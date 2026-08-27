@@ -1,174 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HuntLand</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #10150f;
-      color: white;
-    }
-
-    header {
-      background: #182218;
-      padding: 22px 18px;
-      text-align: center;
-      border-bottom: 2px solid #73834a;
-    }
-
-    header h1 {
-      font-size: 34px;
-      letter-spacing: 2px;
-    }
-
-    header p {
-      margin-top: 6px;
-      color: #c8d0bb;
-    }
-
-    .hero {
-      min-height: 480px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px 20px;
-      background:
-        linear-gradient(rgba(8,15,8,.65), rgba(8,15,8,.85)),
-        linear-gradient(135deg, #31442b, #11170f);
-    }
-
-    .hero-content {
-      max-width: 700px;
-    }
-
-    .hero h2 {
-      font-size: 42px;
-      margin-bottom: 18px;
-    }
-
-    .hero p {
-      font-size: 19px;
-      line-height: 1.6;
-      color: #e0e4db;
-      margin-bottom: 28px;
-    }
-
-    .button {
-      display: inline-block;
-      background: #788d45;
-      color: white;
-      padding: 15px 26px;
-      border-radius: 7px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 17px;
-    }
-
-    .section {
-      padding: 55px 20px;
-      max-width: 1050px;
-      margin: auto;
-    }
-
-    .section h2 {
-      text-align: center;
-      font-size: 30px;
-      margin-bottom: 35px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: #1b241a;
-      border: 1px solid #354431;
-      padding: 28px 20px;
-      border-radius: 10px;
-    }
-
-    .card h3 {
-      color: #a9bd72;
-      margin-bottom: 12px;
-    }
-
-    .card p {
-      color: #cdd4c8;
-      line-height: 1.5;
-    }
-
-    footer {
-      text-align: center;
-      padding: 28px 15px;
-      background: #0b0f0a;
-      color: #899184;
-      font-size: 14px;
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#173b25">
+<title>HuntLand LA/MS</title>
+<style>
+:root{--g:#173b25;--ink:#172019;--muted:#6b726b;--line:#dfe3dc;--soft:#eff3ed;--amber:#fff0c7;--blue:#dfeff5}
+*{box-sizing:border-box}
+html,body{margin:0;background:#dfe3df;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+#app{max-width:430px;margin:auto;min-height:100vh;background:#fff;position:relative;padding-bottom:82px;overflow:hidden}
+.top{background:var(--g);color:#fff;padding:calc(16px + env(safe-area-inset-top)) 16px 15px;border-radius:0 0 22px 22px}
+.brand{font-size:24px;font-weight:900}
+.tag{font-size:12px;opacity:.82}
+.search{margin-top:13px;background:#fff;color:#777;padding:12px;border-radius:13px}
+.page{display:none}.page.active{display:block}
+.section{padding:10px 14px}
+.h{font-size:20px;font-weight:900;margin:11px 0}
+.seg{display:flex;gap:7px;padding:12px 14px 0}
+.seg button,.chip{border:0;border-radius:20px;padding:9px 12px;background:#edf0eb}
+.seg .on{background:#cfe1d2;color:var(--g);font-weight:800}
+.map{margin:12px 14px;height:300px;border-radius:18px;overflow:hidden;position:relative;background:linear-gradient(135deg,#b8d0ae,#d8d0ab);border:1px solid #aab9a6}
+.water{position:absolute;width:120px;height:390px;right:35px;top:-40px;background:#9bc7d3;transform:rotate(12deg);border-radius:45%}
+.slough{position:absolute;width:190px;height:45px;left:-25px;bottom:38px;background:#91c1cf;border-radius:50%;transform:rotate(-18deg)}
+.road{position:absolute;width:520px;height:8px;background:#d8cbb1;left:-50px;top:118px;transform:rotate(-17deg)}
+.road.r2{top:220px;transform:rotate(25deg)}
+.trail{position:absolute;width:340px;height:4px;border-top:4px dashed #805c38;left:42px;top:170px;transform:rotate(10deg)}
+.pin{position:absolute;width:36px;height:36px;border-radius:50%;background:var(--g);color:#fff;border:3px solid #fff;text-align:center;padding-top:6px;box-shadow:0 2px 5px #0004}
+.p1{left:52px;top:74px}.p2{right:50px;top:100px}.p3{left:171px;bottom:46px}.p4{right:116px;bottom:115px}.p5{left:90px;bottom:66px;background:#a56329}
+.layers{display:flex;gap:7px;overflow:auto;padding:0 14px 8px}
+.chip{white-space:nowrap;font-size:12px}
+.chip.active{background:var(--g);color:white}
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;background:#fff}
+.name{font-weight:850;font-size:17px}
+.meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.badge{background:var(--soft);padding:6px 8px;border-radius:9px;font-size:11px}
+.primary,.secondary{width:100%;border:0;padding:12px;border-radius:12px;font-weight:800;margin-top:9px}
+.primary{background:var(--g);color:white}
+.secondary{border:1px solid var(--g);background:white;color:var(--g)}
+.detailHead{padding:calc(14px + env(safe-area-inset-top)) 16px 8px}
+.back{border:0;background:none;color:var(--g);font-weight:800;padding:0 0 12px}
+.title{font-size:27px;font-weight:900}
+.warning{background:var(--amber);padding:11px;border-radius:12px;font-size:12px;margin:12px 0;line-height:1.4}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:#f1f3ee;border-radius:13px;padding:12px;font-size:13px}
+.tile b{display:block;margin-bottom:4px}
+.row{padding:13px 0;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:10px}
+.score{font-weight:900;color:var(--g)}
+.option{border:1px solid var(--line);border-radius:13px;padding:12px;margin:8px 0}
+.option.selected{border:2px solid var(--g);background:#eff5ef}
+.result{background:#edf5ed;border-radius:15px;padding:14px;margin-top:13px}
+.reason{font-size:13px;margin:8px 0;line-height:1.35}
+.bottom{position:fixed;bottom:0;z-index:20;max-width:430px;width:100%;height:calc(70px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding-top:9px}
+.nav{border:0;background:none;color:#727872;font-size:11px}
+.nav b{display:block;font-size:19px}
+.nav.on{color:var(--g);font-weight:800}
+.toggle{appearance:none;width:46px;height:26px;border-radius:20px;background:#ccc;position:relative}
+.toggle:checked{background:var(--g)}
+.toggle:after{content:"";position:absolute;width:22px;height:22px;top:2px;left:2px;background:#fff;border-radius:50%;transition:.15s}
+.toggle:checked:after{left:22px}
+.season{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center}
+.ico{font-size:26px}
+.status{font-size:11px;font-weight:800;padding:5px 7px;border-radius:8px;background:#fff0c7;color:#6f5200}
+.noteArea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit}
+.bigcenter{text-align:center;padding:35px 18px}
+.bigcenter .emoji{font-size:54px}
+.savedItem{display:flex;align-items:center;justify-content:space-between;gap:10px}
+hr{border:0;border-top:1px solid #eee;margin:14px 0}
+</style>
 </head>
 
 <body>
+<div id="app">
 
-<header>
-  <h1>HUNTLAND</h1>
-  <p>Find Your Next Hunting Adventure</p>
-</header>
+<section id="mapPage" class="page active">
+<div class="top">
+<div class="brand">🏹 HuntLand LA/MS</div>
+<div class="tag">Know the land before you hunt it.</div>
+<div class="search">🔎 Public-land hunting scout</div>
+</div>
 
-<section class="hero">
-  <div class="hero-content">
-    <h2>Find Land. Hunt More.</h2>
-    <p>
-      Discover hunting land, public hunting opportunities,
-      and the information you need to plan your next hunt.
-    </p>
+<div class="seg">
+<button class="on" onclick="filterState(this,'all')">All</button>
+<button onclick="filterState(this,'la')">Louisiana</button>
+<button onclick="filterState(this,'ms')">Mississippi</button>
+</div>
 
-    <a class="button" href="#explore">Explore Hunting Land</a>
-  </div>
+<div class="map">
+<div class="water"></div><div class="slough"></div>
+<div class="road"></div><div class="road r2"></div><div class="trail"></div>
+<div class="pin p1">🅿️</div><div class="pin p2">🚤</div>
+<div class="pin p3">🌳</div><div class="pin p4">🚶</div><div class="pin p5">📍</div>
+</div>
+
+<div class="layers">
+<button class="chip active" onclick="toggleLayer(this)">Boundary</button>
+<button class="chip active" onclick="toggleLayer(this)">🅿️ Parking</button>
+<button class="chip active" onclick="toggleLayer(this)">🚤 Ramps</button>
+<button class="chip active" onclick="toggleLayer(this)">🚶 Walk</button>
+<button class="chip" onclick="toggleLayer(this)">🛻 ATV</button>
+<button class="chip" onclick="toggleLayer(this)">🚵 E-bike</button>
+<button class="chip" onclick="toggleLayer(this)">🌳 Habitat</button>
+<button class="chip" onclick="toggleLayer(this)">💧 Water</button>
+</div>
+
+<div class="section">
+<div class="h">Public land</div>
+
+<div class="card land ms">
+<div class="name">Panther Swamp NWR</div>
+<div class="meta">Mississippi • National Wildlife Refuge</div>
+<div class="badges"><span class="badge">🦌 Deer</span><span class="badge">🚤 Boat</span><span class="badge">🛻 ATV</span><span class="badge">🌳 Bottomland hardwood</span></div>
+<button class="primary" onclick="openProperty('panther')">Open property</button>
+</div>
+
+<div class="card land la">
+<div class="name">Richard K. Yancey WMA</div>
+<div class="meta">Louisiana • Wildlife Management Area</div>
+<div class="badges"><span class="badge">🦌 Deer</span><span class="badge">🦃 Turkey</span><span class="badge">🚤 Water access</span></div>
+<button class="primary" onclick="openProperty('yancey')">Open property</button>
+</div>
+
+<div class="card land la">
+<div class="name">Kisatchie National Forest</div>
+<div class="meta">Louisiana • National Forest</div>
+<div class="badges"><span class="badge">🦌 Deer</span><span class="badge">🦃 Turkey</span><span class="badge">🛻 MVUM routes</span></div>
+<button class="primary" onclick="openProperty('kisatchie')">Open property</button>
+</div>
+
+<div class="card land ms">
+<div class="name">Homochitto National Forest</div>
+<div class="meta">Mississippi • National Forest</div>
+<div class="badges"><span class="badge">🦌 Deer</span><span class="badge">🦃 Turkey</span><span class="badge">🚶 Forest access</span></div>
+<button class="primary" onclick="openProperty('homochitto')">Open property</button>
+</div>
+</div>
 </section>
 
-<section class="section" id="explore">
-  <h2>Explore HuntLand</h2>
+<section id="propertyPage" class="page">
+<div class="detailHead">
+<button class="back" onclick="go('mapPage')">‹ Back to map</button>
+<div class="meta" id="propMeta"></div>
+<div class="title" id="propTitle"></div>
+</div>
+<div class="section">
+<div class="warning"><b>⚠️ Verify before hunting.</b><br>Seasons, closures, permits and motorized access can change.</div>
+<div class="grid" id="propTiles"></div>
+<div class="h">Hunter quick look</div>
+<div id="scores"></div>
 
-  <div class="cards">
+<div class="h">Access & map layers</div>
+<div class="card">
+<div class="row"><span>🅿️ Parking / access points</span><input class="toggle" type="checkbox" checked></div>
+<div class="row"><span>🚤 Boat ramps / water access</span><input class="toggle" type="checkbox" checked></div>
+<div class="row"><span>🚶 Walking access</span><input class="toggle" type="checkbox" checked></div>
+<div class="row"><span>🛻 ATV / motorized routes</span><input class="toggle" type="checkbox"></div>
+<div class="row"><span>🚵 E-bike access</span><input class="toggle" type="checkbox"></div>
+<div class="row"><span>🌳 Habitat / feed-tree layer</span><input class="toggle" type="checkbox"></div>
+<div class="row"><span>💧 Water / sloughs / creeks</span><input class="toggle" type="checkbox"></div>
+</div>
 
-    <div class="card">
-      <h3>Public Land</h3>
-      <p>Find public hunting areas and opportunities near you.</p>
-    </div>
+<div class="h">What you need to know</div>
+<div id="officialFacts"></div>
 
-    <div class="card">
-      <h3>Hunting Land</h3>
-      <p>Explore land and properties available for hunting.</p>
-    </div>
-
-    <div class="card">
-      <h3>Maps</h3>
-      <p>Use maps to research hunting areas and plan your hunt.</p>
-    </div>
-
-    <div class="card">
-      <h3>Hunting Information</h3>
-      <p>Find useful information for deer, turkey and other hunting opportunities.</p>
-    </div>
-
-  </div>
+<button class="primary" onclick="openScout()">🧭 Scout This Area</button>
+<button class="secondary" onclick="saveCurrent()">⭐ Save property</button>
+<button class="secondary" onclick="dropTruck()">📍 Save Truck / Boat Location</button>
+</div>
 </section>
 
-<footer>
-  © 2026 HuntLand. All rights reserved.
-</footer>
+<section id="scoutPage" class="page">
+<div class="detailHead">
+<button class="back" onclick="go('propertyPage')">‹ Back to property</button>
+<div class="title">🧭 Scout This Area</div>
+<div class="meta" id="scoutProp"></div>
+</div>
+<div class="section">
 
+<div class="h">1. Species</div>
+<div class="option selected" data-group="species" onclick="choose(this)">🦌 Deer</div>
+<div class="option" data-group="species" onclick="choose(this)">🦃 Turkey</div>
+<div class="option" data-group="species" onclick="choose(this)">🦆 Waterfowl</div>
+
+<div class="h">2. Access style</div>
+<div class="option selected" data-group="access" onclick="choose(this)">🚶 Walk-in</div>
+<div class="option" data-group="access" onclick="choose(this)">🚤 Boat-in</div>
+<div class="option" data-group="access" onclick="choose(this)">🛻 ATV-assisted</div>
+
+<div class="h">3. Hunt time</div>
+<div class="option selected" data-group="time" onclick="choose(this)">🌅 Morning</div>
+<div class="option" data-group="time" onclick="choose(this)">🌇 Evening</div>
+
+<div class="h">4. How far will you go?</div>
+<div class="option" data-group="distance" onclick="choose(this)">Easy — under 0.5 mi</div>
+<div class="option selected" data-group="distance" onclick="choose(this)">Moderate — 0.5–1.5 mi</div>
+<div class="option" data-group="distance" onclick="choose(this)">Deep — 1.5+ mi</div>
+
+<button class="primary" onclick="runScout()">Analyze scouting approach</button>
+<div id="scoutResult" class="result" style="display:none"></div>
+</div>
+</section>
+
+<section id="seasonsPage" class="page">
+<div class="top"><div class="brand">📅 Seasons & Rules</div><div class="tag">Property-specific reminders and legal checks</div></div>
+<div class="section">
+<div class="warning"><b>Always verify official regulations before hunting.</b></div>
+<div class="card season"><div class="ico">🦌</div><div><b>Deer</b><div class="meta">LA & MS public-land rules</div></div><div class="status">VERIFY</div></div>
+<div class="card season"><div class="ico">🦃</div><div><b>Turkey</b><div class="meta">State + refuge/WMA rules</div></div><div class="status">VERIFY</div></div>
+<div class="card season"><div class="ico">🦆</div><div><b>Waterfowl</b><div class="meta">Dates, units and closures</div></div><div class="status">VERIFY</div></div>
+
+<div class="h">Pre-hunt checklist</div>
+<div class="card">
+<div class="row">☐ Correct state hunting license</div>
+<div class="row">☐ WMA/refuge/public-use permit</div>
+<div class="row">☐ Weapon legal for today's hunt</div>
+<div class="row">☐ Check-in requirement</div>
+<div class="row">☐ ATV / e-bike route legal today</div>
+<div class="row">☐ Closures checked</div>
+<div class="row">☐ Truck/boat location saved</div>
+</div>
+</div>
+</section>
+
+<section id="savedPage" class="page">
+<div class="top"><div class="brand">⭐ Saved</div><div class="tag">Properties and back-to-truck pins</div></div>
+<div class="section" id="savedList"></div>
+</section>
+
+<section id="toolsPage" class="page">
+<div class="top"><div class="brand">🧰 Hunter Tools</div><div class="tag">Useful when you don't know an area</div></div>
+<div class="section">
+<div class="card"><div class="name">📍 Back to Truck</div><div class="meta">Save your truck or boat-ramp location.</div><button class="primary" onclick="dropTruck()">Drop pin</button></div>
+<div class="card"><div class="name">🌳 Feed / Habitat Notes</div><textarea id="notes" class="noteArea" placeholder="White oaks dropping near slough crossing..."></textarea><button class="primary" onclick="saveNotes()">Save notes</button></div>
+</div>
+</section>
+
+<div class="bottom">
+<button class="nav on" onclick="nav(this,'mapPage')"><b>🗺️</b>Map</button>
+<button class="nav" onclick="nav(this,'seasonsPage')"><b>📅</b>Seasons</button>
+<button class="nav" onclick="nav(this,'savedPage')"><b>⭐</b>Saved</button>
+<button class="nav" onclick="nav(this,'toolsPage')"><b>🧰</b>Tools</button>
+</div>
+</div>
+
+<script>
+const props={
+panther:{
+title:"Panther Swamp NWR",
+meta:"MISSISSIPPI • NATIONAL WILDLIFE REFUGE",
+tiles:[["🚤 Boat","Lake George & Deep Bayou access"],["🛻 ATV","Designated seasonal trails"],["🚵 E-bike","Verify current rules"],["🌳 Habitat","Bottomland hardwood / sloughs"]],
+scores:[["Access","★★★★☆"],["Walk-in potential","★★★★☆"],["Boat-access potential","★★★★★"],["Beginner navigation","★★★☆☆"]],
+facts:[
+["Public Use Permit","Verify current USFWS permit requirements before hunting."],
+["Walking","Use legal open areas and established access routes."],
+["ATVs","Use only designated routes when legally open."],
+["Habitat","Bottomland hardwoods, sloughs and slight ridges make small elevation changes important."]
+]},
+yancey:{
+title:"Richard K. Yancey WMA",
+meta:"LOUISIANA • WILDLIFE MANAGEMENT AREA",
+tiles:[["🦌 Deer","Major deer opportunity"],["🚤 Water","Bottomland access"],["🌳 Habitat","Bottomland hardwood"],["📋 Rules","WMA-specific seasons"]],
+scores:[["Access","★★★★☆"],["Walk-in potential","★★★★☆"],["Water-access potential","★★★★☆"],["Beginner navigation","★★★☆☆"]],
+facts:[
+["WMA rules","WMA seasons and special regulations can differ from statewide seasons."],
+["Access","Carry required licenses and permits."],
+["Habitat scouting","Focus on higher hardwood ridges, mast, water edges and thick-cover transitions."],
+["Flooding","Bottomland conditions can change quickly."]
+]},
+kisatchie:{
+title:"Kisatchie National Forest",
+meta:"LOUISIANA • NATIONAL FOREST",
+tiles:[["🛻 MVUM","Legal motorized routes"],["🦌 Deer","Multiple hunting areas"],["🚶 Access","Large walk-in opportunities"],["📴 Remote","Cell service may be limited"]],
+scores:[["Access","★★★★★"],["Walk-in potential","★★★★★"],["Motorized access","★★★★☆"],["Beginner navigation","★★★☆☆"]],
+facts:[
+["MVUM","Use the current Motor Vehicle Use Map for legal motorized access."],
+["Roads","A road shown on another map is not automatically legal for motorized use."],
+["Remote areas","Carry offline navigation and save your vehicle position."],
+["Scouting","Look at creek bottoms, pine/hardwood transitions, mast and distance from easy road access."]
+]},
+homochitto:{
+title:"Homochitto National Forest",
+meta:"MISSISSIPPI • NATIONAL FOREST",
+tiles:[["🦌 Deer","Public-land deer hunting"],["🦃 Turkey","Large forest opportunity"],["🚶 Access","Road + walk-in network"],["🌳 Habitat","Pine / hardwood mix"]],
+scores:[["Access","★★★★☆"],["Walk-in potential","★★★★★"],["Terrain variety","★★★★☆"],["Beginner navigation","★★★☆☆"]],
+facts:[
+["Forest rules","State rules apply along with National Forest restrictions."],
+["Motorized use","Verify current legal motor-vehicle routes."],
+["Scouting","Look for hardwood drains, creek systems, young growth, mast and roadless pockets."],
+["Offline maps","Save your vehicle location before entering large timber blocks."]
+]}
+};
+
+let current="panther";
+
+function go(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+window.scrollTo(0,0);
+}
+
+function nav(btn,id){
+document.querySelectorAll('.nav').forEach(b=>b.classList.remove('on'));
+btn.classList.add('on');
+go(id);
+if(id==='savedPage')renderSaved();
+}
+
+function filterState(btn,s){
+document.querySelectorAll('.seg button').forEach(b=>b.classList.remove('on'));
+btn.classList.add('on');
+document.querySelectorAll('.land').forEach(c=>c.style.display=(s==='all'||c.classList.contains(s))?'block':'none');
+}
+
+function toggleLayer(x){x.classList.toggle('active');}
+
+function openProperty(key){
+current=key;
+const p=props[key];
+document.getElementById('propTitle').textContent=p.title;
+document.getElementById('propMeta').textContent=p.meta;
+document.getElementById('propTiles').innerHTML=p.tiles.map(t=>`<div class="tile"><b>${t[0]}</b>${t[1]}</div>`).join('');
+document.getElementById('scores').innerHTML=p.scores.map(s=>`<div class="row"><span>${s[0]}</span><span class="score">${s[1]}</span></div>`).join('');
+document.getElementById('officialFacts').innerHTML=p.facts.map(f=>`<div class="card"><b>${f[0]}</b><div class="meta">${f[1]}</div></div>`).join('');
+go('propertyPage');
+}
+
+function openScout(){
+document.getElementById('scoutProp').textContent=props[current].title;
+document.getElementById('scoutResult').style.display='none';
+go('scoutPage');
+}
+
+function choose(x){
+document.querySelectorAll(`.option[data-group="${x.dataset.group}"]`).forEach(o=>o.classList.remove('selected'));
+x.classList.add('selected');
+}
+
+function runScout(){
+const p=props[current];
+let result=`<b>🌳 HuntLand scouting plan — ${p.title}</b>`;
+
+if(current==='panther')
+result+=`<div class="reason">• Start with legal access, then look for higher hardwood ridges bordering sloughs or wet cover.</div><div class="reason">• Prioritize mast-producing oaks, crossings and transitions into thicker cover.</div><div class="reason">• Boat access may help reach less pressured areas when legally accessible.</div>`;
+
+if(current==='yancey')
+result+=`<div class="reason">• Look at higher bottomland ridges, mast, slough edges and cover transitions.</div><div class="reason">• Watch changing water levels.</div><div class="reason">• Compare easy roadside access with deeper walk-in pockets.</div>`;
+
+if(current==='kisatchie')
+result+=`<div class="reason">• Check the current MVUM first.</div><div class="reason">• Focus on creek bottoms, hardwood/pine transitions, mast and young cover.</div><div class="reason">• Save your vehicle location before leaving service.</div>`;
+
+if(current==='homochitto')
+result+=`<div class="reason">• Focus on hardwood drains, creek bottoms, young growth and mast.</div><div class="reason">• Look for pockets beyond obvious pull-offs.</div><div class="reason">• Save your truck location before walking into large timber blocks.</div>`;
+
+result+=`<hr><b>Scouting potential: HIGH</b><div class="meta">Habitat/access analysis only. Always follow current regulations.</div><button class="secondary" onclick="dropTruck()">📍 Drop Back-to-Truck pin</button>`;
+
+document.getElementById('scoutResult').innerHTML=result;
+document.getElementById('scoutResult').style.display='block';
+document.getElementById('scoutResult').scrollIntoView({behavior:'smooth'});
+}
+
+function saved(){
+return JSON.parse(localStorage.getItem('huntlandSaved')||'[]');
+}
+
+function saveCurrent(){
+let s=saved();
+let n=props[current].title;
+if(!s.includes(n))s.push(n);
+localStorage.setItem('huntlandSaved',JSON.stringify(s));
+alert(n+' saved ⭐');
+}
+
+function dropTruck(){
+localStorage.setItem('huntlandTruck',JSON.stringify({
+name:props[current]?.title||'Current area',
+time:new Date().toLocaleString()
+}));
+alert('Truck / boat location saved 📍');
+}
+
+function renderSaved(){
+let s=saved();
+let t=localStorage.getItem('huntlandTruck');
+let html='';
+
+if(s.length){
+html+='<div class="h">Saved properties</div>'+
+s.map(x=>`<div class="card savedItem"><div><b>${x}</b><div class="meta">Saved property</div></div><span>⭐</span></div>`).join('');
+}
+
+if(t){
+let p=JSON.parse(t);
+html+=`<div class="h">Back-to-Truck</div><div class="card"><b>📍 ${p.name}</b><div class="meta">Pin dropped ${p.time}</div></div>`;
+}
+
+if(!html)
+html='<div class="bigcenter"><div class="emoji">⭐</div><div class="h">Nothing saved yet</div><div class="meta">Save a property or drop a truck/boat pin.</div></div>';
+
+document.getElementById('savedList').innerHTML=html;
+}
+
+function saveNotes(){
+localStorage.setItem('huntlandNotes',document.getElementById('notes').value);
+alert('Habitat notes saved 🌳');
+}
+
+document.getElementById('notes').value=localStorage.getItem('huntlandNotes')||'';
+</script>
 </body>
 </html>
