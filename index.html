@@ -1,324 +1,997 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
+<title>HuntLand</title>
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+
+html,
+body,
+#map{
+height:100%;
+margin:0;
+}
+
+body{
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+background:#111;
+color:#fff;
+overflow:hidden;
+}
+
+.leaflet-container{
+background:#1b241c;
+}
+
+.topbar{
+position:absolute;
+z-index:1000;
+top:max(10px,env(safe-area-inset-top));
+left:10px;
+right:10px;
+display:flex;
+gap:8px;
+pointer-events:none;
+}
+
+.brand,
+.topbtn{
+pointer-events:auto;
+background:rgba(18,24,18,.94);
+border:1px solid rgba(255,255,255,.18);
+box-shadow:0 4px 18px #0008;
+border-radius:14px;
+}
+
+.brand{
+padding:9px 12px;
+font-weight:900;
+letter-spacing:.4px;
+}
+
+.brand b{
+color:#b7ff54;
+}
+
+.topbtn{
+margin-left:auto;
+color:white;
+padding:8px 12px;
+font-weight:800;
+}
+
+.drawer{
+position:absolute;
+z-index:1001;
+left:8px;
+right:8px;
+bottom:max(8px,env(safe-area-inset-bottom));
+background:rgba(15,19,15,.97);
+border:1px solid #ffffff22;
+border-radius:18px;
+max-height:48vh;
+overflow:auto;
+box-shadow:0 -6px 24px #0009;
+padding:10px;
+}
+
+.drawer.closed{
+display:none;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+}
+
+.card{
+background:#202820;
+border:1px solid #ffffff18;
+border-radius:12px;
+padding:9px;
+}
+
+.row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+}
+
+.name{
+font-weight:850;
+}
+
+.sub{
+font-size:12px;
+color:#cbd5cb;
+line-height:1.35;
+}
+
+.status{
+font-size:12px;
+padding:8px 9px;
+border-radius:10px;
+background:#142514;
+border:1px solid #477a47;
+margin:8px 0;
+}
+
+.bad{
+background:#2a1717;
+border-color:#8b4545;
+}
+
+.warn{
+background:#2c2613;
+border-color:#867126;
+}
+
+.btn{
+border:0;
+border-radius:10px;
+padding:9px 10px;
+font-weight:850;
+}
+
+.primary{
+background:#a8ed4a;
+color:#12200c;
+}
+
+.secondary{
+background:#333c33;
+color:white;
+border:1px solid #ffffff1f;
+}
+
+.danger{
+background:#7f2525;
+color:white;
+}
+
+.btnrow{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-top:8px;
+}
+
+.toggle{
+display:flex;
+align-items:center;
+gap:8px;
+margin:7px 0;
+font-size:13px;
+}
+
+.toggle input{
+width:20px;
+height:20px;
+}
+
+.section{
+margin-top:8px;
+}
+
+.input{
+width:100%;
+box-sizing:border-box;
+border-radius:10px;
+border:1px solid #ffffff24;
+background:#111711;
+color:#fff;
+padding:10px;
+}
+
+.legend{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+font-size:11px;
+color:#d5ddd5;
+margin-top:6px;
+}
+
+.sw{
+width:18px;
+height:5px;
+border-radius:4px;
+display:inline-block;
+margin-right:4px;
+}
+
+.fab{
+position:absolute;
+z-index:999;
+right:10px;
+background:#172017;
+color:white;
+border:1px solid #ffffff22;
+border-radius:50%;
+width:46px;
+height:46px;
+font-size:20px;
+box-shadow:0 3px 12px #0008;
+}
+
+.locate{
+top:70px;
+}
+
+.pin{
+top:122px;
+}
+
+.measure{
+top:174px;
+}
+
+.fab.on{
+background:#a8ed4a;
+color:#11200d;
+}
+
+.iconMarker{
+font-size:24px;
+filter:drop-shadow(0 2px 2px #000);
+}
+
+.userMarker{
+width:15px;
+height:15px;
+border-radius:50%;
+background:#48a9ff;
+border:3px solid white;
+box-shadow:0 0 0 5px #48a9ff55;
+}
+
+.leaflet-control-zoom{
+margin-top:225px!important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip{
+background:#182018;
+color:#fff;
+}
+
+.leaflet-popup-content{
+margin:10px 12px;
+}
+
+.leaflet-control-attribution{
+font-size:9px;
+}
+
+.small{
+font-size:11px;
+color:#c9d2c9;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<div class="topbar">
+
+<div class="brand">
+<b>HUNT</b>LAND
+</div>
+
+<button
+class="topbtn"
+onclick="toggleDrawer()">
+Layers & Tools
+</button>
+
+</div>
+
+<button
+class="fab locate"
+onclick="locateMe()"
+title="Locate">
+◎
+</button>
+
+<button
+id="pinFab"
+class="fab pin"
+onclick="togglePinMode()"
+title="Drop pin">
+📍
+</button>
+
+<button
+id="measureFab"
+class="fab measure"
+onclick="toggleMeasure()"
+title="Measure">
+📏
+</button>
+
+<div
+id="drawer"
+class="drawer">
+
+<div class="row">
+
+<div>
+
+<div class="name">
+Public Land + Trails
+</div>
+
+<div class="sub">
+High-contrast overlays rendered directly from agency map services.
+</div>
+
+</div>
+
+<button
+class="btn secondary"
+onclick="toggleDrawer()">
+Hide
+</button>
+
+</div>
+
+<div
+id="overallStatus"
+class="status">
+Starting map…
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<div class="name">
+Louisiana
+</div>
+
+<label class="toggle">
+
+<input
+id="laBound"
+type="checkbox"
+checked
+onchange="setOverlay('laBoundary',this.checked)">
+
+Official WMA boundaries
+
+</label>
+
+<label class="toggle">
+
+<input
+id="laTrail"
+type="checkbox"
+checked
+onchange="setOverlay('laTrails',this.checked)">
+
+WMA / refuge trails
+
+</label>
+
+<div
+id="laStatus"
+class="sub">
+Waiting…
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="name">
+Mississippi
+</div>
+
+<label class="toggle">
+
+<input
+id="msBound"
+type="checkbox"
+checked
+onchange="setOverlay('msBoundary',this.checked)">
+
+WMA boundaries
+
+</label>
+
+<label class="toggle">
+
+<input
+id="msTrail"
+type="checkbox"
+checked
+onchange="setOverlay('msTrails',this.checked)">
+
+Roads & trails
+
+</label>
+
+<label class="toggle">
+
+<input
+id="msAccess"
+type="checkbox"
+onchange="setOverlay('msAccess',this.checked)">
+
+Access points
+
+</label>
+
+<div
+id="msStatus"
+class="sub">
+Waiting…
+</div>
+
+</div>
+
+</div>
+
+<div class="legend">
+
+<span>
+<i
+class="sw"
+style="background:#ffe600">
+</i>
+LA boundary
+</span>
+
+<span>
+<i
+class="sw"
+style="background:#00e5ff">
+</i>
+LA trails
+</span>
+
+<span>
+<i
+class="sw"
+style="background:#ff8c00">
+</i>
+MS boundary
+</span>
+
+<span>
+<i
+class="sw"
+style="background:#ff43d1">
+</i>
+MS roads/trails
+</span>
+
+</div>
+
+<div class="section card">
+
+<div class="name">
+Basemap
+</div>
+
+<div class="btnrow">
+
+<button
+class="btn primary"
+onclick="setBase('sat')">
+Satellite
+</button>
+
+<button
+class="btn secondary"
+onclick="setBase('road')">
+Road
+</button>
+
+<button
+class="btn secondary"
+onclick="setBase('topo')">
+Topo
+</button>
+
+</div>
+
+</div>
+
+<div class="section card">
+
+<div class="name">
+Go to coordinates
+</div>
+
+<input
+id="coordInput"
+class="input"
+placeholder="31.12345, -91.54321">
+
+<div class="btnrow">
+
+<button
+class="btn primary"
+onclick="goCoords(false)">
+Go
+</button>
+
+<button
+class="btn secondary"
+onclick="goCoords(true)">
+Go + Save Pin
+</button>
+
+</div>
+
+</div>
+
+<div class="section card">
+
+<div class="name">
+Waypoints
+</div>
+
+<div
+id="pinList"
+class="sub">
+No saved waypoints yet.
+</div>
+
+<div class="btnrow">
+
+<button
+class="btn secondary"
+onclick="exportGPX()">
+Export GPX
+</button>
+
+<button
+class="btn secondary"
+onclick="document.getElementById('gpxFile').click()">
+Import GPX
+</button>
+
+<button
+class="btn danger"
+onclick="clearPins()">
+Clear Pins
+</button>
+
+<input
+id="gpxFile"
+type="file"
+accept=".gpx,application/gpx+xml"
+hidden
+onchange="importGPX(event)">
+
+</div>
+
+</div>
+
+<div class="section card">
+
+<div class="name">
+Trail test
+</div>
+
+<div class="sub">
+Zoom into a WMA. Trails should remain visible above the satellite imagery.
+If an agency service is down, HuntLand will still work and show which overlay failed.
+</div>
+
+<div class="btnrow">
+
+<button
+class="btn primary"
+onclick="refreshOverlays(true)">
+↻ Reload overlays
+</button>
+
+<button
+class="btn secondary"
+onclick="clearMeasure()">
+Clear measure
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script>
+  <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#173b25">
 <title>HuntLand</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js"></script>
+
 <style>
-:root{--g:#173b25;--line:#dfe3dc;--muted:#687169;--soft:#eef3ed;--warn:#fff0c7;--red:#8c2b2b;--la:#ffe100;--ms:#ff8b00}
-*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}#map{position:absolute;inset:0;z-index:1}
-header{position:absolute;top:0;left:0;right:0;z-index:1100;background:rgba(23,59,37,.96);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.tag,.small{font-size:11px;color:var(--muted)}header .tag{color:#fff;opacity:.82}.live{font-size:11px}.toptools{position:absolute;top:calc(55px + env(safe-area-inset-top));left:7px;right:7px;z-index:1050;display:flex;gap:6px;overflow-x:auto;padding:6px;border-radius:13px;background:rgba(255,255,255,.95);box-shadow:0 2px 9px #0003}.toptools button{white-space:nowrap;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;font-weight:800}.toptools button.on{background:var(--g);color:#fff}.fabs{position:absolute;right:10px;top:calc(110px + env(safe-area-inset-top));z-index:1000;display:grid;gap:8px}.fab{width:48px;height:48px;border:0;border-radius:50%;background:#fff;font-size:20px;box-shadow:0 2px 9px #0005}.fab.on{background:var(--g);color:#fff}
-.drawer{position:absolute;left:0;right:0;bottom:0;height:108px;z-index:1200;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 18px #0004;transition:height .22s ease;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}.drawer.open{height:60vh}.drawerHandle{height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}.grab{width:48px;height:5px;border-radius:5px;background:#bcc3bc;margin-bottom:7px}.handleText{font-size:13px;font-weight:900;color:var(--g)}.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 10px 8px}.tabs button{border:0;border-radius:18px;background:#edf0eb;padding:8px 11px;font-weight:800;white-space:nowrap}.tabs button.on{background:var(--g);color:#fff}.drawerBody{height:calc(60vh - 94px);overflow:auto;padding:0 10px 25px;-webkit-overflow-scrolling:touch}.panel{display:none}.panel.on{display:block}.h{font-size:19px;font-weight:900;margin:8px 0}.sub{font-size:12px;color:var(--muted);line-height:1.45}.card{border:1px solid var(--line);border-radius:14px;padding:11px;margin:8px 0;background:#fff}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.name{font-weight:900}.badge{display:inline-block;background:var(--soft);border-radius:8px;padding:5px 7px;font-size:11px;margin:5px 4px 0 0}.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.btn{border:0;border-radius:10px;padding:9px 10px;font-weight:800}.primary{background:var(--g);color:#fff}.secondary{background:#fff;color:var(--g);border:1px solid var(--g)}.danger{background:#f6e8e8;color:var(--red)}.wide{width:100%}.field{margin:8px 0}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:4px}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.notice{background:var(--warn);border-radius:11px;padding:9px;font-size:11px;line-height:1.4}.status{padding:8px;border-radius:10px;background:#eef5ef;font-size:12px;margin:8px 0}.status.bad{background:#f7e6e6;color:#7d2222}.iconMarker{font-size:25px;text-align:center;filter:drop-shadow(0 2px 2px #0006)}.userMarker{width:18px;height:18px;background:#1688ff;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 8px #1688ff30}.toast{position:absolute;z-index:2500;left:50%;bottom:120px;transform:translateX(-50%);background:#182019;color:#fff;padding:9px 12px;border-radius:10px;font-size:12px;max-width:85%;display:none;box-shadow:0 3px 12px #0005}.leaflet-control-zoom{margin-top:115px!important}.legend{position:absolute;left:9px;top:calc(112px + env(safe-area-inset-top));z-index:900;background:#fff;border-radius:10px;padding:7px 9px;box-shadow:0 2px 8px #0003;font-size:11px}.sw{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}.sw.la{background:var(--la)}.sw.ms{background:var(--ms)}
+*{box-sizing:border-box}
+html,body,#app{margin:0;width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+#map{position:absolute;inset:0;z-index:1}
+
+header{
+ position:absolute;top:0;left:0;right:0;z-index:1100;
+ background:rgba(23,59,37,.96);color:#fff;
+ padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+ display:flex;justify-content:space-between;align-items:center
+}
+.brand{font-size:22px;font-weight:900}
+.tag{font-size:11px;opacity:.82}
+.live{font-size:11px}
+
+.toptools{
+ position:absolute;top:calc(55px + env(safe-area-inset-top));
+ left:7px;right:7px;z-index:1050;display:flex;gap:6px;
+ overflow-x:auto;padding:6px;border-radius:13px;
+ background:rgba(255,255,255,.95);box-shadow:0 2px 9px #0003
+}
+.toptools button{
+ white-space:nowrap;border:1px solid #dfe3dc;border-radius:10px;
+ padding:8px 10px;background:#fff;font-weight:800
+}
+.toptools button.on{background:#173b25;color:#fff}
+
+.fabs{
+ position:absolute;right:10px;top:calc(110px + env(safe-area-inset-top));
+ z-index:1000;display:grid;gap:8px
+}
+.fab{
+ width:48px;height:48px;border:0;border-radius:50%;background:#fff;
+ font-size:20px;box-shadow:0 2px 9px #0005
+}
+.fab.on{background:#173b25;color:#fff}
+
+.drawer{
+ position:absolute;left:0;right:0;bottom:0;height:108px;z-index:1200;
+ background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -4px 18px #0004;
+ transition:height .22s ease;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)
+}
+.drawer.open{height:58vh}
+.drawerHandle{
+ height:54px;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;cursor:pointer;touch-action:manipulation
+}
+.grab{width:48px;height:5px;border-radius:5px;background:#bcc3bc;margin-bottom:7px}
+.handleText{font-size:13px;font-weight:900;color:#173b25}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:0 10px 8px}
+.tabs button{
+ border:0;border-radius:18px;background:#edf0eb;padding:8px 11px;
+ font-weight:800;white-space:nowrap
+}
+.tabs button.on{background:#173b25;color:#fff}
+
+.drawerBody{
+ height:calc(58vh - 94px);overflow:auto;padding:0 10px 25px;
+ -webkit-overflow-scrolling:touch
+}
+.panel{display:none}.panel.on{display:block}
+.h{font-size:19px;font-weight:900;margin:8px 0}
+.sub{font-size:12px;color:#687169;line-height:1.45}
+.card{border:1px solid #dfe3dc;border-radius:14px;padding:11px;margin:8px 0;background:#fff}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.name{font-weight:900}.small{font-size:11px;color:#687169}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.btn{border:0;border-radius:10px;padding:9px 10px;font-weight:800}
+.primary{background:#173b25;color:#fff}
+.secondary{background:#fff;color:#173b25;border:1px solid #173b25}
+.danger{background:#f6e8e8;color:#8c2b2b}
+.wide{width:100%}
+.field{margin:8px 0}
+.field label{display:block;font-size:12px;font-weight:800;margin-bottom:4px}
+.field input,.field select,.field textarea{
+ width:100%;border:1px solid #dfe3dc;border-radius:10px;padding:10px;background:#fff
+}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.notice{background:#fff0c7;border-radius:11px;padding:9px;font-size:11px;line-height:1.4}
+.iconMarker{font-size:25px;text-align:center;filter:drop-shadow(0 2px 2px #0006)}
+.userMarker{
+ width:18px;height:18px;background:#1688ff;border:3px solid #fff;
+ border-radius:50%;box-shadow:0 0 0 8px #1688ff30
+}
+.toast{
+ position:absolute;z-index:2500;left:50%;bottom:120px;transform:translateX(-50%);
+ background:#182019;color:#fff;padding:9px 12px;border-radius:10px;
+ font-size:12px;max-width:85%;display:none;box-shadow:0 3px 12px #0005
+}
+.leaflet-control-zoom{margin-top:115px!important}
 @media(min-width:700px){.drawer.open{height:52vh}.drawerBody{height:calc(52vh - 94px)}}
 </style>
 </head>
+
 <body>
 <div id="app">
 
 <header>
-<div>
-<div class="brand">🏹 HuntLand</div>
-<div class="tag">Public land • E-scout • Navigate</div>
-</div>
-<div class="live">● Direct GeoJSON</div>
+ <div>
+  <div class="brand">🏹 HuntLand</div>
+  <div class="tag">Public land • E-scout • Navigate</div>
+ </div>
+ <div class="live">● Live GIS</div>
 </header>
 
 <div class="toptools">
-<button class="on" data-base="sat" onclick="setBase('sat',this)">🛰 Satellite</button>
-<button data-base="road" onclick="setBase('road',this)">🗺 Road</button>
-<button data-base="topo" onclick="setBase('topo',this)">⛰ Topo</button>
-<button onclick="locateMe()">📍 GPS</button>
-<button onclick="reloadPublicLand()">↻ Reload land</button>
+ <button class="on" data-base="sat" onclick="setBase('sat',this)">🛰 Satellite</button>
+ <button data-base="road" onclick="setBase('road',this)">🗺 Road</button>
+ <button data-base="topo" onclick="setBase('topo',this)">⛰ Topo</button>
+ <button onclick="locateMe()">📍 GPS</button>
 </div>
 
 <div id="map"></div>
 
-<div class="legend">
-<div><span class="sw la"></span>Louisiana public land</div>
-<div><span class="sw ms"></span>Mississippi WMA</div>
-</div>
-
 <div class="fabs">
-<button id="pinFab" class="fab" onclick="togglePinMode()">➕</button>
-<button id="measureFab" class="fab" onclick="toggleMeasure()">📏</button>
-<button class="fab" onclick="clearMeasure()">✖</button>
+ <button id="pinFab" class="fab" onclick="togglePinMode()">➕</button>
+ <button id="measureFab" class="fab" onclick="toggleMeasure()">📏</button>
+ <button class="fab" onclick="clearMeasure()">✖</button>
 </div>
 
 <div id="toast" class="toast"></div>
 
 <div id="drawer" class="drawer open">
-<div class="drawerHandle" onclick="toggleDrawer()">
-<div class="grab"></div>
-<div id="handleText" class="handleText">▼ Hide HuntLand tools</div>
-</div>
+ <div class="drawerHandle" onclick="toggleDrawer()">
+  <div class="grab"></div>
+  <div id="handleText" class="handleText">▼ Hide HuntLand tools</div>
+ </div>
 
-<div class="tabs">
-<button class="on" onclick="openTab('land',this)">Public Land</button>
-<button onclick="openTab('pins',this)">Waypoints</button>
-<button onclick="openTab('scout',this)">Scout</button>
-<button onclick="openTab('layers',this)">Layers</button>
-</div>
+ <div class="tabs">
+  <button class="on" onclick="openTab('land',this)">Public Land</button>
+  <button onclick="openTab('pins',this)">Waypoints</button>
+  <button onclick="openTab('scout',this)">Scout</button>
+  <button onclick="openTab('layers',this)">Layers</button>
+ </div>
 
-<div class="drawerBody">
+ <div class="drawerBody">
 
-<section id="land" class="panel on">
-<div class="h">Public Hunting Land</div>
-<div id="loadStatus" class="status">Loading statewide boundaries…</div>
-<div class="sub">Tap a yellow Louisiana or orange Mississippi polygon. The polygons are fetched directly as GeoJSON and drawn by Leaflet.</div>
-<div id="selectedLand" class="card">
-<div class="name">Tap a public-land boundary</div>
-<div class="small">Property details will appear here.</div>
-</div>
-</section>
+  <section id="land" class="panel on">
+   <div class="h">Public Hunting Land</div>
+   <div class="sub">
+    Tap a boundary on the map. Louisiana and Mississippi state public-land polygons
+    load from agency GIS instead of a short hard-coded property list.
+   </div>
+   <div id="selectedLand" class="card">
+    <div class="name">Tap a public-land boundary</div>
+    <div class="small">Property information will appear here.</div>
+   </div>
+  </section>
 
-<section id="pins" class="panel">
-<div class="h">Waypoints</div>
-<div class="sub">Drop a pin with ➕ or paste coordinates from onX.</div>
+  <section id="pins" class="panel">
+   <div class="h">Waypoints</div>
+   <div class="sub">Drop pins or paste coordinates from onX.</div>
 
-<div class="card">
-<div class="field">
-<label>Coordinates</label>
-<input id="coordInput" placeholder="31.12345, -91.54321">
-</div>
+   <div class="card">
+    <div class="field">
+     <label>Coordinates</label>
+     <input id="coordInput" placeholder="31.12345, -91.54321">
+    </div>
 
-<div class="grid2">
-<div class="field">
-<label>Type</label>
-<select id="coordType">
-<option value="camp">🏕 Camp</option>
-<option value="truck">🛻 Truck</option>
-<option value="boat">🚤 Boat/Ramp</option>
-<option value="stand">🌲 Stand</option>
-<option value="camera">📷 Camera</option>
-<option value="rub">🦌 Rub</option>
-<option value="scrape">🦌 Scrape</option>
-<option value="feed">🌰 Feed</option>
-<option value="scout">📌 Scout</option>
-</select>
-</div>
+    <div class="grid2">
+     <div class="field">
+      <label>Type</label>
+      <select id="coordType">
+       <option value="camp">🏕 Camp</option>
+       <option value="truck">🛻 Truck</option>
+       <option value="boat">🚤 Boat/Ramp</option>
+       <option value="stand">🌲 Stand</option>
+       <option value="camera">📷 Camera</option>
+       <option value="rub">🦌 Rub</option>
+       <option value="scrape">🦌 Scrape</option>
+       <option value="feed">🌰 Feed</option>
+       <option value="scout">📌 Scout</option>
+      </select>
+     </div>
 
-<div class="field">
-<label>Name</label>
-<input id="coordName" placeholder="North stand">
-</div>
-</div>
+     <div class="field">
+      <label>Name</label>
+      <input id="coordName" placeholder="North stand">
+     </div>
+    </div>
 
-<div class="btnrow">
-<button class="btn primary" onclick="goCoords(false)">Go</button>
-<button class="btn secondary" onclick="goCoords(true)">Save Pin</button>
-</div>
-</div>
+    <div class="btnrow">
+     <button class="btn primary" onclick="goCoords(false)">Go</button>
+     <button class="btn secondary" onclick="goCoords(true)">Save Pin</button>
+    </div>
+   </div>
 
-<div class="btnrow">
-<button class="btn secondary" onclick="exportGPX()">Export GPX</button>
+   <div class="btnrow">
+    <button class="btn secondary" onclick="exportGPX()">Export GPX</button>
+    <label class="btn secondary">
+     Import GPX
+     <input type="file" accept=".gpx" style="display:none" onchange="importGPX(event)">
+    </label>
+    <button class="btn danger" onclick="clearPins()">Clear Pins</button>
+   </div>
 
-<label class="btn secondary">
-Import GPX
-<input type="file" accept=".gpx" style="display:none" onchange="importGPX(event)">
-</label>
+   <div id="pinList"></div>
+  </section>
 
-<button class="btn danger" onclick="clearPins()">Clear Pins</button>
-</div>
+  <section id="scout" class="panel">
+   <div class="h">E-Scout</div>
+   <div id="scoutProperty" class="notice">
+    Tap a public-land boundary first.
+   </div>
 
-<div id="pinList"></div>
-</section>
+   <div class="grid2">
+    <div class="field">
+     <label>Species</label>
+     <select id="species">
+      <option>Deer</option>
+      <option>Turkey</option>
+      <option>Waterfowl</option>
+      <option>Small Game</option>
+     </select>
+    </div>
 
-<section id="scout" class="panel">
-<div class="h">E-Scout</div>
-<div id="scoutProperty" class="notice">Tap a public-land polygon first.</div>
+    <div class="field">
+     <label>Access</label>
+     <select id="access">
+      <option>Walk-in</option>
+      <option>E-bike</option>
+      <option>ATV-assisted</option>
+      <option>Boat-in</option>
+     </select>
+    </div>
+   </div>
 
-<div class="grid2">
-<div class="field">
-<label>Species</label>
-<select id="species">
-<option>Deer</option>
-<option>Turkey</option>
-<option>Waterfowl</option>
-<option>Small Game</option>
-</select>
-</div>
+   <button class="btn primary wide" onclick="buildScout()">🎯 Analyze Selected Area</button>
+   <div id="scoutResult"></div>
+  </section>
 
-<div class="field">
-<label>Access</label>
-<select id="access">
-<option>Walk-in</option>
-<option>E-bike</option>
-<option>ATV-assisted</option>
-<option>Boat-in</option>
-</select>
-</div>
-</div>
+  <section id="layers" class="panel">
+   <div class="h">Map Layers</div>
 
-<button class="btn primary wide" onclick="buildScout()">🎯 Analyze Selected Area</button>
-<div id="scoutResult"></div>
-</section><section id="layers" class="panel">
-<div class="h">Map Layers</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">Louisiana Public Land</div><div class="small">LDWF feature polygons</div></div>
+     <input type="checkbox" checked onchange="toggleLayer('la',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Louisiana statewide public land</div>
-<div class="small">Direct GeoJSON — WMA/refuge/conservation polygons</div>
-</div>
-<input id="laToggle" type="checkbox" checked onchange="toggleGeoLayer('la',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">Mississippi WMAs</div><div class="small">MDWFP property polygons</div></div>
+     <input type="checkbox" checked onchange="toggleLayer('ms',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Mississippi WMA boundaries</div>
-<div class="small">Direct GeoJSON — MDWFP</div>
-</div>
-<input id="msToggle" type="checkbox" checked onchange="toggleGeoLayer('ms',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">Mississippi Roads & Trails</div><div class="small">MDWFP</div></div>
+     <input type="checkbox" onchange="toggleLayer('msRoads',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Mississippi Roads & Trails</div>
-<div class="small">MDWFP live GIS</div>
-</div>
-<input type="checkbox" onchange="toggleServiceLayer('msRoads',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">MS Access Points</div><div class="small">Ramps, parking, gates and other features</div></div>
+     <input type="checkbox" onchange="toggleLayer('msPoints',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Mississippi Access Points</div>
-<div class="small">Parking, gates, ramps and permit stations</div>
-</div>
-<input type="checkbox" onchange="toggleServiceLayer('msPoints',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">National Forest Boundaries</div><div class="small">USFS</div></div>
+     <input type="checkbox" checked onchange="toggleLayer('forest',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">National Forest Boundaries</div>
-<div class="small">U.S. Forest Service</div>
-</div>
-<input type="checkbox" checked onchange="toggleServiceLayer('forest',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">USFS MVUM / E-bike</div><div class="small">Motorized routes + e-bike classifications</div></div>
+     <input type="checkbox" onchange="toggleLayer('mvum',this.checked)">
+    </div>
+   </div>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">USFS MVUM / E-bike Routes</div>
-<div class="small">Motorized roads/trails and e-bike information where published</div>
-</div>
-<input type="checkbox" onchange="toggleServiceLayer('mvum',this.checked)">
-</div>
-</div>
+   <div class="card">
+    <div class="row">
+     <div><div class="name">Boat Launches</div><div class="small">Mapped launches in current view</div></div>
+     <input type="checkbox" onchange="toggleBoatLaunches(this.checked)">
+    </div>
+   </div>
+  </section>
 
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Boat Launches</div>
-<div class="small">Mapped launches in the current map view</div>
-</div>
-<input type="checkbox" onchange="toggleBoatLaunches(this.checked)">
-</div>
-</div>
-
-</section>
-
-</div>
+ </div>
 </div>
 
 <script>
-
-const map=L.map('map',{
-zoomControl:true,
-preferCanvas:true
-}).setView([31.7,-91.2],7);
+const map=L.map('map',{zoomControl:true,preferCanvas:true}).setView([31.7,-91.2],7);
 
 const bases={
-
-sat:L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-{
-maxZoom:19,
-attribution:'© Esri'
-}
-),
-
-road:L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-maxZoom:19,
-attribution:'© OpenStreetMap'
-}
-),
-
-topo:L.tileLayer(
-'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-{
-maxZoom:17,
-attribution:'© OpenTopoMap'
-}
-)
-
+ sat:L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {maxZoom:19,attribution:'© Esri'}
+ ),
+ road:L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19,attribution:'© OpenStreetMap'}
+ ),
+ topo:L.tileLayer(
+  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+  {maxZoom:17,attribution:'© OpenTopoMap'}
+ )
 };
 
 let currentBase=bases.sat.addTo(map);
 
-const laLayer=L.geoJSON(null,{
-style:{
-color:'#ffe100',
-weight:4,
-opacity:1,
-fillColor:'#ffe100',
-fillOpacity:.10
-},
-onEachFeature:bindPublicFeature
+const laPublic=L.esri.featureLayer({
+ url:'https://services8.arcgis.com/d94Q2SC5G6CZf0Vt/ArcGIS/rest/services/MyMapService/FeatureServer/0',
+ style:()=>({
+  color:'#ffd400',
+  weight:3,
+  opacity:1,
+  fillColor:'#ffd400',
+  fillOpacity:.10
+ })
 }).addTo(map);
 
-const msLayer=L.geoJSON(null,{
-style:feature=>msStyle(feature),
-onEachFeature:bindPublicFeature
+const msPublic=L.esri.featureLayer({
+ url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer/2',
+ style:()=>({
+  color:'#ff8c00',
+  weight:3,
+  opacity:1,
+  fillColor:'#ff8c00',
+  fillOpacity:.10
+ })
 }).addTo(map);
 
-const msRoads=L.esri.dynamicMapLayer({
-url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer',
-layers:[5],
-opacity:1
+const msRoads=L.esri.featureLayer({
+ url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer/5',
+ style:()=>({color:'#ffffff',weight:3,opacity:.95})
 });
 
-const msPoints=L.esri.dynamicMapLayer({
-url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer',
-layers:[0],
-opacity:1
+const msPoints=L.esri.featureLayer({
+ url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer/0',
+ pointToLayer:(geojson,latlng)=>L.circleMarker(latlng,{
+  radius:6,color:'#111',weight:2,fillColor:'#fff',fillOpacity:1
+ })
 });
 
 const forest=L.esri.dynamicMapLayer({
-url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ProclaimedForestBoundaries_01/MapServer',
-layers:[0],
-opacity:.70
+ url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ProclaimedForestBoundaries_01/MapServer',
+ layers:[0],
+ opacity:.65
 }).addTo(map);
 
 const mvum=L.esri.dynamicMapLayer({
-url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_01/MapServer',
-opacity:.95
+ url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_01/MapServer',
+ opacity:.95
 });
-
-const serviceLayers={
-msRoads,
-msPoints,
-forest,
-mvum
-};
 
 const waypointLayer=L.layerGroup().addTo(map);
 const measureLayer=L.layerGroup().addTo(map);
 const boatLayer=L.layerGroup();
+
+const appLayers={la:laPublic,ms:msPublic,msRoads,msPoints,forest,mvum};
 
 let selectedProperty=null;
 let pinMode=false;
@@ -327,825 +1000,131 @@ let measurePoints=[];
 let boatEnabled=false;
 let userMarker=null;
 
-let waypoints=JSON.parse(
-localStorage.getItem('huntlandWaypoints')||'[]'
-);
-
-const LA_URL=
-'https://services8.arcgis.com/d94Q2SC5G6CZf0Vt/ArcGIS/rest/services/MyMapService/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson';
-
-const MS_URL=
-'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer/2/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson';
+let waypoints=JSON.parse(localStorage.getItem('huntlandWaypoints')||'[]');
 
 function esc(v){
-return String(v??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;',
-'<':'&lt;',
-'>':'&gt;',
-'"':'&quot;',
-"'":'&#39;'
-}[c]));
+ return String(v??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
 }
 
 function toast(msg){
-const t=document.getElementById('toast');
-
-t.textContent=msg;
-t.style.display='block';
-
-clearTimeout(toast.timer);
-
-toast.timer=setTimeout(()=>{
-t.style.display='none';
-},2600);
+ const t=document.getElementById('toast');
+ t.textContent=msg;
+ t.style.display='block';
+ clearTimeout(toast.timer);
+ toast.timer=setTimeout(()=>t.style.display='none',2500);
 }
 
 function setBase(name,btn){
-
-map.removeLayer(currentBase);
-
-currentBase=bases[name].addTo(map);
-
-document.querySelectorAll('[data-base]')
-.forEach(x=>x.classList.remove('on'));
-
-btn.classList.add('on');
+ map.removeLayer(currentBase);
+ currentBase=bases[name].addTo(map);
+ document.querySelectorAll('[data-base]').forEach(x=>x.classList.remove('on'));
+ btn.classList.add('on');
 }
 
 function toggleDrawer(){
-
-const d=document.getElementById('drawer');
-
-const open=!d.classList.contains('open');
-
-d.classList.toggle('open',open);
-
-document.getElementById('handleText').textContent=
-open
-?'▼ Hide HuntLand tools'
-:'▲ Show HuntLand tools';
-
-setTimeout(()=>{
-map.invalidateSize();
-},230);
+ const d=document.getElementById('drawer');
+ const open=!d.classList.contains('open');
+ d.classList.toggle('open',open);
+ document.getElementById('handleText').textContent=
+  open?'▼ Hide HuntLand tools':'▲ Show HuntLand tools';
+ setTimeout(()=>map.invalidateSize(),230);
 }
 
 function openTab(id,btn){
+ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+ document.getElementById(id).classList.add('on');
+ document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
+ btn.classList.add('on');
 
-document.querySelectorAll('.panel')
-.forEach(p=>p.classList.remove('on'));
-
-document.getElementById(id)
-.classList.add('on');
-
-document.querySelectorAll('.tabs button')
-.forEach(b=>b.classList.remove('on'));
-
-btn.classList.add('on');
-
-document.getElementById('drawer')
-.classList.add('open');
-
-document.getElementById('handleText')
-.textContent='▼ Hide HuntLand tools';
-
-setTimeout(()=>{
-map.invalidateSize();
-},200);
+ const d=document.getElementById('drawer');
+ d.classList.add('open');
+ document.getElementById('handleText').textContent='▼ Hide HuntLand tools';
+ setTimeout(()=>map.invalidateSize(),200);
 }
 
-function msStyle(feature){
-
-const type=String(
-feature?.properties?.TYPE||
-'WMA'
-).toUpperCase();
-
-if(
-type.includes('PRIVATE')||
-type.includes('NO HUNT')
-){
-
-return{
-color:'#ff3030',
-weight:3,
-fillColor:'#ff3030',
-fillOpacity:.08,
-dashArray:'6,4'
-};
-
+function toggleLayer(name,on){
+ const layer=appLayers[name];
+ if(!layer)return;
+ if(on)layer.addTo(map);
+ else map.removeLayer(layer);
 }
 
-return{
-color:'#ff8b00',
-weight:4,
-opacity:1,
-fillColor:'#ff8b00',
-fillOpacity:.10
-};
-}
-
-function propertyName(props){
-
-return(
-props?.NAME||
-props?.Name||
-props?.WMA_NAME||
-props?.WMA||
-props?.PROPERTY||
-props?.AREA_NAME||
-props?.SITE_NAME||
-'Public Hunting Land'
-);
-
-}
-
-function bindPublicFeature(feature,layer){
-
-const props=feature.properties||{};
-
-const name=propertyName(props);
-
-layer.bindTooltip(name,{
-sticky:true,
-direction:'top'
-});
-
-layer.on('click',event=>{
-
-const state=
-feature.__huntlandState||
-(props.TYPE!==undefined?'MS':'LA');
-
-selectProperty(
-name,
-state==='MS'?'MDWFP':'LDWF',
-props,
-event.latlng
-);
-
-});
-
+function getName(props){
+ return props.NAME||props.Name||props.WMA||props.FORESTNAME||props.FORESTNAME_||'Public Hunting Land';
 }
 
 function selectProperty(name,agency,props,latlng){
+ selectedProperty={name,agency,props,latlng};
 
-selectedProperty={
-name,
-agency,
-props,
-latlng
-};
+ document.getElementById('selectedLand').innerHTML=`
+  <div class="name">🏹 ${esc(name)}</div>
+  <div class="small">${esc(agency)}</div>
+  <div class="btnrow">
+   <button class="btn primary" onclick="openScoutTab()">Scout This Area</button>
+   <button class="btn secondary" onclick="copyCoords(${latlng.lat},${latlng.lng})">Copy Location</button>
+  </div>
+ `;
 
-const type=
-props.TYPE||
-props.Type||
-props.Lease||
-'';
+ document.getElementById('scoutProperty').innerHTML=
+  `<b>${esc(name)}</b><br>${esc(agency)}`;
+}
 
-document.getElementById('selectedLand').innerHTML=`
+laPublic.bindPopup(layer=>{
+ const p=layer.feature.properties||{};
+ const name=getName(p);
+ return `<div class="name">🏹 ${esc(name)}</div>
+ <div class="small">Louisiana Department of Wildlife & Fisheries</div>
+ <button class="btn primary wide" onclick="selectPopupProperty('LA','${encodeURIComponent(name)}')">Use This Property</button>`;
+});
 
-<div class="name">
-🏹 ${esc(name)}
-</div>
+msPublic.bindPopup(layer=>{
+ const p=layer.feature.properties||{};
+ const name=getName(p);
+ const type=p.TYPE||'WMA';
+ return `<div class="name">🏹 ${esc(name)}</div>
+ <div class="small">MDWFP • ${esc(type)}</div>
+ <button class="btn primary wide" onclick="selectPopupProperty('MS','${encodeURIComponent(name)}')">Use This Property</button>`;
+});
 
-<div class="small">
-${esc(agency)}
-${type?' • '+esc(type):''}
-</div>
+let lastPopupLatLng=null;
 
-<div class="btnrow">
+map.on('popupopen',e=>{
+ lastPopupLatLng=e.popup.getLatLng();
+});
 
-<button
-class="btn primary"
-onclick="openScoutTab()">
-Scout This Area
-</button>
-
-<button
-class="btn secondary"
-onclick="copyCoords(${latlng.lat},${latlng.lng})">
-Copy Location
-</button>
-
-</div>
-`;
-
-document.getElementById('scoutProperty').innerHTML=`
-<b>${esc(name)}</b>
-<br>
-${esc(agency)}
-${type?' • '+esc(type):''}
-`;
-
-document.getElementById('drawer')
-.classList.add('open');
-
-document.getElementById('handleText')
-.textContent='▼ Hide HuntLand tools';
-
+function selectPopupProperty(state,encodedName){
+ const name=decodeURIComponent(encodedName);
+ const agency=state==='LA'?'LDWF':'MDWFP';
+ selectProperty(name,agency,{},lastPopupLatLng||map.getCenter());
+ map.closePopup();
+ document.getElementById('drawer').classList.add('open');
+ document.getElementById('handleText').textContent='▼ Hide HuntLand tools';
 }
 
 function openScoutTab(){
-
-openTab(
-'scout',
-document.querySelectorAll('.tabs button')[2]async function loadGeoJSON(url,layer,label,state){
-
-const response=await fetch(url,{
-cache:'no-store'
-});
-
-if(!response.ok){
-throw new Error(`${label} HTTP ${response.status}`);
+ const btn=document.querySelectorAll('.tabs button')[2];
+ openTab('scout',btn);
 }
+  function addMeasurePoint(p){
 
-const data=await response.json();
-
-if(!data || !Array.isArray(data.features)){
-throw new Error(`${label} returned no features`);
-}
-
-data.features.forEach(f=>{
-f.__huntlandState=state;
-});
-
-layer.clearLayers();
-layer.addData(data);
-
-return data.features.length;
-}
-
-async function reloadPublicLand(){
-
-const status=document.getElementById('loadStatus');
-
-status.className='status';
-status.textContent='Loading statewide boundaries…';
-
-let laCount=0;
-let msCount=0;
-const errors=[];
-
-try{
-
-laCount=await loadGeoJSON(
-LA_URL,
-laLayer,
-'Louisiana',
-'LA'
-);
-
-}catch(e){
-
-errors.push(
-'Louisiana: '+e.message
-);
-
-}
-
-try{
-
-msCount=await loadGeoJSON(
-MS_URL,
-msLayer,
-'Mississippi',
-'MS'
-);
-
-}catch(e){
-
-errors.push(
-'Mississippi: '+e.message
-);
-
-}
-
-if(errors.length){
-
-status.className='status bad';
-
-status.innerHTML=`
-Loaded ${laCount} Louisiana + ${msCount} Mississippi features.
-<br>
-${errors.map(esc).join('<br>')}
-<br>
-Tap ↻ Reload land to retry.
-`;
-
-}else{
-
-status.className='status';
-
-status.textContent=
-`Loaded ${laCount} Louisiana + ${msCount} Mississippi public-land features.`;
-
-toast('Public-land boundaries loaded');
-
-}
-
-}
-
-function toggleGeoLayer(which,on){
-
-const layer=
-which==='la'
-?laLayer
-:msLayer;
-
-if(on){
-layer.addTo(map);
-}else{
-map.removeLayer(layer);
-}
-
-}
-
-function toggleServiceLayer(name,on){
-
-const layer=serviceLayers[name];
-
-if(!layer)return;
-
-if(on){
-layer.addTo(map);
-toast('Layer on');
-}else{
-map.removeLayer(layer);
-}
-
-}
-
-function markerIcon(text){
-
-return L.divIcon({
-className:'',
-html:`<div class="iconMarker">${text}</div>`,
-iconSize:[30,30],
-iconAnchor:[15,25]
-});
-
-}
-
-function waypointEmoji(type){
-
-return({
-camp:'🏕️',
-truck:'🛻',
-boat:'🚤',
-stand:'🌲',
-camera:'📷',
-rub:'🦌',
-scrape:'🦌',
-feed:'🌰',
-scout:'📌'
-})[type]||'📍';
-
-}
-
-function locateMe(){
-
-if(!navigator.geolocation){
-toast('GPS unavailable');
-return;
-}
-
-navigator.geolocation.getCurrentPosition(
-
-pos=>{
-
-const lat=pos.coords.latitude;
-const lng=pos.coords.longitude;
-
-if(userMarker){
-
-userMarker.setLatLng([lat,lng]);
-
-}else{
-
-userMarker=L.marker([lat,lng],{
-icon:L.divIcon({
-className:'',
-html:'<div class="userMarker"></div>',
-iconSize:[18,18],
-iconAnchor:[9,9]
-})
-})
-.addTo(map)
-.bindPopup('Your location');
-
-}
-
-map.flyTo([lat,lng],16);
-
-},
-
-err=>toast(
-'GPS: '+err.message
-),
-
-{
-enableHighAccuracy:true,
-timeout:12000,
-maximumAge:5000
-}
-
-);
-
-}
-
-function togglePinMode(){
-
-pinMode=!pinMode;
-measureMode=false;
-
-document.getElementById('pinFab')
-.classList.toggle('on',pinMode);
-
-document.getElementById('measureFab')
-.classList.remove('on');
-
-toast(
-pinMode
-?'Tap the map to drop a waypoint'
-:'Pin mode off'
-);
-
-}
-
-function saveWaypoint(lat,lng,type,name){
-
-const waypoint={
-id:Date.now()+Math.random(),
-lat:Number(lat),
-lng:Number(lng),
-type:type||'scout',
-name:name||'Waypoint',
-created:new Date().toISOString()
-};
-
-waypoints.push(waypoint);
-
-localStorage.setItem(
-'huntlandWaypoints',
-JSON.stringify(waypoints)
-);
-
-drawWaypoints();
-renderPins();
-
-toast('Waypoint saved');
-
-}
-
-function drawWaypoints(){
-
-waypointLayer.clearLayers();
-
-waypoints.forEach(w=>{
-
-L.marker(
-[w.lat,w.lng],
-{
-icon:markerIcon(
-waypointEmoji(w.type)
-)
-}
-)
-.addTo(waypointLayer)
-.bindPopup(`
-
-<div class="name">
-${waypointEmoji(w.type)}
-${esc(w.name)}
-</div>
-
-<div class="small">
-${w.lat.toFixed(6)},
-${w.lng.toFixed(6)}
-</div>
-
-<div class="btnrow">
-
-<button
-class="btn secondary"
-onclick="copyCoords(${w.lat},${w.lng})">
-Copy
-</button>
-
-<button
-class="btn danger"
-onclick="deleteWaypoint('${w.id}')">
-Delete
-</button>
-
-</div>
-
-`);
-
-});
-
-}
-
-function renderPins(){
-
-const el=document.getElementById('pinList');
-
-if(!waypoints.length){
-
-el.innerHTML=`
-<div class="sub"
-style="padding:14px;text-align:center">
-No saved waypoints yet.
-</div>
-`;
-
-return;
-
-}
-
-el.innerHTML=
-waypoints
-.slice()
-.reverse()
-.map(w=>`
-
-<div class="card">
-
-<div class="row">
-
-<div>
-
-<div class="name">
-${waypointEmoji(w.type)}
-${esc(w.name)}
-</div>
-
-<div class="small">
-${w.lat.toFixed(6)},
-${w.lng.toFixed(6)}
-</div>
-
-</div>
-
-<button
-class="btn primary"
-onclick="map.flyTo([${w.lat},${w.lng}],16)">
-Map
-</button>
-
-</div>
-
-<div class="btnrow">
-
-<button
-class="btn secondary"
-onclick="copyCoords(${w.lat},${w.lng})">
-Copy Coordinates
-</button>
-
-<button
-class="btn danger"
-onclick="deleteWaypoint('${w.id}')">
-Delete
-</button>
-
-</div>
-
-</div>
-
-`).join('');
-
-}
-
-function deleteWaypoint(id){
-
-waypoints=waypoints.filter(
-w=>String(w.id)!==String(id)
-);
-
-localStorage.setItem(
-'huntlandWaypoints',
-JSON.stringify(waypoints)
-);
-
-drawWaypoints();
-renderPins();
-map.closePopup();
-
-}
-
-function clearPins(){
-
-if(
-!confirm(
-'Delete all saved HuntLand waypoints?'
-)
-){
-return;
-}
-
-waypoints=[];
-
-localStorage.setItem(
-'huntlandWaypoints',
-JSON.stringify(waypoints)
-);
-
-drawWaypoints();
-renderPins();
-
-toast('Pins cleared');
-
-}
-
-async function copyCoords(lat,lng){
-
-const text=
-`${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`;
-
-try{
-
-await navigator.clipboard.writeText(text);
-
-toast('Coordinates copied');
-
-}catch(e){
-
-prompt(
-'Copy coordinates:',
-text
-);
-
-}
-
-}
-
-function parseCoords(text){
-
-const match=String(text||'')
-.trim()
-.match(
-/^\s*(-?\d+(?:\.\d+)?)\s*[, ]+\s*(-?\d+(?:\.\d+)?)\s*$/
-);
-
-if(!match)return null;
-
-const lat=Number(match[1]);
-const lng=Number(match[2]);
-
-if(
-!Number.isFinite(lat)||
-!Number.isFinite(lng)||
-lat<-90||
-lat>90||
-lng<-180||
-lng>180
-){
-return null;
-}
-
-return{lat,lng};
-
-}
-
-function goCoords(save){
-
-const coords=parseCoords(
-document.getElementById('coordInput').value
-);
-
-if(!coords){
-
-toast(
-'Use coordinates like 31.12345, -91.54321'
-);
-
-return;
-}
-
-map.flyTo(
-[coords.lat,coords.lng],
-16
-);
-
-if(!save){
-
-L.popup()
-.setLatLng(
-[coords.lat,coords.lng]
-)
-.setContent(`
-
-<div class="name">
-Coordinates
-</div>
-
-<div class="small">
-${coords.lat.toFixed(6)},
-${coords.lng.toFixed(6)}
-</div>
-
-`)
-.openOn(map);
-
-return;
-
-}
-
-const type=
-document.getElementById('coordType').value;
-
-const name=
-document.getElementById('coordName').value.trim()||
-type;
-
-saveWaypoint(
-coords.lat,
-coords.lng,
-type,
-name
-);
-
-}
-
-map.on('click',event=>{
-
-if(measureMode){
-
-addMeasurePoint(
-event.latlng
-);
-
-return;
-
-}
-
-if(!pinMode)return;
-
-const type=prompt(
-'Type: camp, truck, boat, stand, camera, rub, scrape, feed, scout',
-'scout'
-);
-
-if(type===null)return;
-
-const name=prompt(
-'Name this waypoint',
-'Scouting spot'
-);
-
-if(name===null)return;
-
-saveWaypoint(
-event.latlng.lat,
-event.latlng.lng,
-type.toLowerCase(),
-name
-);
-
-pinMode=false;
-
-document.getElementById('pinFab')
-.classList.remove('on');
-
-});
-
-function toggleMeasure(){
-
-measureMode=!measureMode;
-pinMode=false;
-
-document.getElementById('measureFab')
-.classList.toggle('on',measureMode);
-
-document.getElementById('pinFab')
-.classList.remove('on');
-
-toast(
-measureMode
-?'Tap points on the map to measure'
-:'Measure mode off'
-);
-
-}
-
-function addMeasurePoint(point){
-
-measurePoints.push(point);
+measurePoints.push(p);
 
 measureLayer.clearLayers();
 
 if(measurePoints.length===1){
 
 L.circleMarker(
-point,
+p,
 {
 radius:5,
 fillOpacity:1
 }
 )
-.addTo(measureLayer);
+.addTo(
+measureLayer
+);
 
 return;
 
@@ -1154,26 +1133,28 @@ return;
 L.polyline(
 measurePoints,
 {
-weight:4,
-color:'#ffea00'
+weight:4
 }
 )
-.addTo(measureLayer);
+.addTo(
+measureLayer
+);
 
-measurePoints.forEach(p=>{
+measurePoints.forEach(
+x=>
 
 L.circleMarker(
-p,
+x,
 {
 radius:4,
-color:'#111',
-fillColor:'#fff',
 fillOpacity:1
 }
 )
-.addTo(measureLayer);
+.addTo(
+measureLayer
+)
 
-});
+);
 
 let meters=0;
 
@@ -1204,6 +1185,7 @@ miles>=.25
 
 }
 
+
 function clearMeasure(){
 
 measurePoints=[];
@@ -1212,310 +1194,74 @@ measureLayer.clearLayers();
 
 measureMode=false;
 
-document.getElementById('measureFab')
-.classList.remove('on');
-
-toast('Measurement cleared');async function toggleBoatLaunches(on){
-
-boatEnabled=on;
-
-if(!on){
-
-map.removeLayer(boatLayer);
-boatLayer.clearLayers();
-
-return;
-}
-
-boatLayer.addTo(map);
-
-await loadBoatLaunches();
-
-}
-
-async function loadBoatLaunches(){
-
-if(!boatEnabled)return;
-
-const b=map.getBounds();
-
-const query=`
-[out:json][timeout:20];
-(
-node["leisure"="slipway"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-node["amenity"="boat_ramp"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-way["leisure"="slipway"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-);
-out center tags;
-`;
-
-try{
-
-toast('Loading boat launches…');
-
-const response=await fetch(
-'https://overpass-api.de/api/interpreter?data='+
-encodeURIComponent(query)
+document.getElementById(
+'measureFab'
+).classList.remove(
+'on'
 );
 
-if(!response.ok){
-throw new Error();
+toast(
+'Measurement cleared'
+);
+
 }
 
-const data=await response.json();
 
-boatLayer.clearLayers();
+/* =========================
+   GPX EXPORT
+   ========================= */
 
-data.elements.forEach(item=>{
+function xmlEscape(v){
 
-const lat=
-item.lat??
-item.center?.lat;
-
-const lng=
-item.lon??
-item.center?.lon;
-
-if(
-!Number.isFinite(lat)||
-!Number.isFinite(lng)
-){
-return;
-}
-
-const name=
-item.tags?.name||
-'Boat Launch';
-
-L.marker(
-[lat,lng],
-{
-icon:markerIcon('🚤')
-}
+return String(
+v??''
 )
-.addTo(boatLayer)
-.bindPopup(`
-
-<div class="name">
-🚤 ${esc(name)}
-</div>
-
-<div class="small">
-Mapped boat launch
-</div>
-
-<div class="btnrow">
-
-<button
-class="btn secondary"
-onclick="copyCoords(${lat},${lng})">
-Copy Coordinates
-</button>
-
-<button
-class="btn primary"
-onclick="saveWaypoint(${lat},${lng},'boat','${esc(name)}')">
-Save Ramp
-</button>
-
-</div>
-
-`);
-
-});
-
-toast(
-`${data.elements.length} boat launches loaded`
-);
-
-}catch(e){
-
-toast(
-'Boat-launch service unavailable right now'
+.replace(
+/&/g,
+'&amp;'
+)
+.replace(
+/</g,
+'&lt;'
+)
+.replace(
+/>/g,
+'&gt;'
+)
+.replace(
+/"/g,
+'&quot;'
+)
+.replace(
+/'/g,
+'&apos;'
 );
 
 }
 
-}
-
-map.on('moveend',()=>{
-
-if(boatEnabled){
-loadBoatLaunches();
-}
-
-});
-
-function buildScout(){
-
-if(!selectedProperty){
-
-toast(
-'Tap a public-land boundary first'
-);
-
-return;
-}
-
-const species=
-document.getElementById('species').value;
-
-const access=
-document.getElementById('access').value;
-
-let advice=[];
-
-if(species==='Deer'){
-
-advice.push(
-'Focus on habitat transitions, mast-producing hardwoods, creek crossings, drainages, bedding cover, funnels and edges.'
-);
-
-advice.push(
-'Compare good habitat against distance from roads, parking areas and easy-access trails to estimate hunting pressure.'
-);
-
-advice.push(
-'Use satellite and topo together to find higher ground beside wet areas, narrow travel corridors and terrain changes.'
-);
-
-}
-
-if(species==='Turkey'){
-
-advice.push(
-'Look for ridges, mature timber, creek bottoms, openings, burns, young growth and likely roost-to-feed travel.'
-);
-
-advice.push(
-'Identify multiple legal access routes so you can reposition without crossing the area you expect birds to use.'
-);
-
-}
-
-if(species==='Waterfowl'){
-
-advice.push(
-'Study shallow water, food sources, boat access, wind direction, water level and safe legal entry/exit routes.'
-);
-
-}
-
-if(species==='Small Game'){
-
-advice.push(
-'Look for young growth, brushy habitat, hardwood edges, mast and areas away from heavy road pressure.'
-);
-
-}
-
-if(access==='Walk-in'){
-
-advice.push(
-'Use the measure tool to compare distance from parking, roads and trails before deciding how deep to scout.'
-);
-
-}
-
-if(access==='Boat-in'){
-
-advice.push(
-'Turn on Boat Launches and Mississippi Access Points where applicable. Save your ramp and return waypoint before leaving.'
-);
-
-}
-
-if(access==='ATV-assisted'){
-
-advice.push(
-'Turn on Mississippi Roads & Trails or USFS MVUM and verify the exact route is legal for your vehicle and hunt date.'
-);
-
-}
-
-if(access==='E-bike'){
-
-advice.push(
-'Turn on USFS MVUM / E-bike. Verify the route, e-bike class and seasonal status before riding.'
-);
-
-}
-
-document.getElementById('scoutResult').innerHTML=`
-
-<div class="card">
-
-<div class="name">
-🎯 ${esc(species)} E-Scout
-</div>
-
-<div class="small">
-${esc(selectedProperty.name)}
-•
-${esc(selectedProperty.agency)}
-•
-${esc(access)}
-</div>
-
-${advice.map(item=>`
-<p class="sub">
-• ${esc(item)}
-</p>
-`).join('')}
-
-<div class="notice">
-These are areas and features worth investigating during e-scouting.
-They are not a guarantee that animals are present.
-Always verify current seasons, permits, closures, weapon rules and access restrictions before hunting.
-</div>
-
-<div class="btnrow">
-
-<button
-class="btn secondary"
-onclick="copyCoords(${selectedProperty.latlng.lat},${selectedProperty.latlng.lng})">
-Copy Area Coordinates
-</button>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-function xmlEscape(value){
-
-return String(value??'')
-.replace(/&/g,'&amp;')
-.replace(/</g,'&lt;')
-.replace(/>/g,'&gt;')
-.replace(/"/g,'&quot;')
-.replace(/'/g,'&apos;');
-
-}
 
 function exportGPX(){
 
 if(!waypoints.length){
 
-toast(
+return toast(
 'No waypoints to export'
 );
 
-return;
 }
 
-const points=
-waypoints.map(w=>`
+const pts=
+waypoints.map(
+w=>
 
-<wpt lat="${w.lat}" lon="${w.lng}">
+`<wpt lat="${w.lat}" lon="${w.lng}">
 <name>${xmlEscape(w.name)}</name>
 <desc>${xmlEscape(w.type)}</desc>
-</wpt>
+</wpt>`
 
-`).join('');
+).join(
+'\n'
+);
 
 const gpx=
 `<?xml version="1.0" encoding="UTF-8"?>
@@ -1523,7 +1269,7 @@ const gpx=
 version="1.1"
 creator="HuntLand"
 xmlns="http://www.topografix.com/GPX/1/1">
-${points}
+${pts}
 </gpx>`;
 
 const blob=
@@ -1535,31 +1281,43 @@ type:'application/gpx+xml'
 );
 
 const url=
-URL.createObjectURL(blob);
+URL.createObjectURL(
+blob
+);
 
-const link=
-document.createElement('a');
+const a=
+document.createElement(
+'a'
+);
 
-link.href=url;
+a.href=url;
 
-link.download=
+a.download=
 'huntland-waypoints.gpx';
 
-document.body.appendChild(link);
+document.body.appendChild(
+a
+);
 
-link.click();
+a.click();
 
-link.remove();
+a.remove();
 
-setTimeout(()=>{
-URL.revokeObjectURL(url);
-},1000);
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
 
 toast(
 'GPX exported'
 );
 
 }
+
+
+/* =========================
+   GPX IMPORT
+   ========================= */
 
 function importGPX(event){
 
@@ -1583,58 +1341,97 @@ reader.result,
 );
 
 if(
-xml.querySelector('parsererror')
+xml.querySelector(
+'parsererror'
+)
 ){
+
 throw new Error();
+
 }
 
 const points=[
-...xml.getElementsByTagNameNS('*','wpt')
+...xml.getElementsByTagNameNS(
+'*',
+'wpt'
+)
 ];
 
 let count=0;
 
-points.forEach(point=>{
+points.forEach(
+p=>{
 
 const lat=
 parseFloat(
-point.getAttribute('lat')
+p.getAttribute(
+'lat'
+)
 );
 
 const lng=
 parseFloat(
-point.getAttribute('lon')
+p.getAttribute(
+'lon'
+)
 );
 
 if(
 !Number.isFinite(lat)||
 !Number.isFinite(lng)
-){
-return;
-}
+)return;
 
 const name=
-point
-.getElementsByTagNameNS('*','name')[0]
+p.getElementsByTagNameNS(
+'*',
+'name'
+)[0]
 ?.textContent||
-'Imported Waypoint';
+'Imported waypoint';
 
 const type=
-point
-.getElementsByTagNameNS('*','desc')[0]
+p.getElementsByTagNameNS(
+'*',
+'desc'
+)[0]
 ?.textContent||
 'scout';
 
-saveWaypoint(
+waypoints.push({
+
+id:
+Date.now()+
+Math.random(),
+
 lat,
+
 lng,
-String(type).toLowerCase(),
+
+type:
+String(type)
+.toLowerCase(),
+
 name
-);
+
+});
 
 count++;
 
 });
+
+localStorage.setItem(
+
+'huntlandWaypoints',
+
+JSON.stringify(
+waypoints
+)
+
+);
+
+drawWaypoints();
+
+renderPins();
 
 toast(
 `${count} GPX waypoints imported`
@@ -1652,61 +1449,74 @@ event.target.value='';
 
 };
 
-reader.readAsText(file);
+reader.readAsText(
+file
+);
 
 }
 
-/* Keep polygon state attached after GeoJSON loads */
 
-laLayer.on('layeradd',e=>{
-
-if(
-e.layer?.feature
-){
-
-e.layer.feature.__huntlandState='LA';
-
-}
-
-});
-
-msLayer.on('layeradd',e=>{
-
-if(
-e.layer?.feature
-){
-
-e.layer.feature.__huntlandState='MS';
-
-}
-
-});
-
-/* Initialize */
-
-reloadPublicLand();
+/* =========================
+   INITIAL DRAW
+   ========================= */
 
 drawWaypoints();
 
 renderPins();
 
-L.control.scale({
-imperial:true,
-metric:false
-}).addTo(map);
+updateOverall();
 
-setTimeout(()=>{
+
+/* =========================
+   SCALE
+   ========================= */
+
+L.control.scale({
+
+imperial:true,
+
+metric:false
+
+})
+.addTo(
+map
+);
+
+
+/* =========================
+   FIX MOBILE MAP SIZE
+   ========================= */
+
+setTimeout(
+()=>{
 
 map.invalidateSize();
 
-},300);
+refreshOverlays(
+true
+);
 
-</script>
-</div>
-</body>
-</html>
+},
+500
+);
+
+
+/* =========================
+   KEEP OVERLAYS ABOVE BASE
+   ========================= */
+
+map.on(
+'baselayerchange',
+()=>{
+
+refreshOverlays(
+false
+);
 
 }
 );
 
-}
+</script>
+
+</body>
+</html>
