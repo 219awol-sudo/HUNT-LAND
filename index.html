@@ -2,375 +2,321 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0d1510">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+>
+
 <title>HuntLand</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-:root{
-  --bg:#0d1510;
-  --panel:#142019;
-  --panel2:#1b2a21;
-  --text:#f4f6f4;
-  --muted:#aeb8b1;
-  --green:#55c96f;
-  --orange:#ff9f43;
-  --purple:#b84cff;
-  --blue:#54a7ff;
-  --red:#ff6464;
-  --border:#2c3e32;
-}
-*{box-sizing:border-box}
-html,body{
-  height:100%;
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  overflow:hidden
-}
-button,input,select{font:inherit}
-button{cursor:pointer}
-#app{
-  height:100%;
-  display:flex;
-  flex-direction:column
-}
-#topbar{
-  min-height:60px;
-  padding:8px 10px calc(8px + env(safe-area-inset-top));
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(13,21,16,.96);
-  border-bottom:1px solid var(--border);
-  z-index:1002
-}
-.brand{
-  font-size:22px;
-  font-weight:800;
-  white-space:nowrap
-}
-.brand span{color:var(--green)}
-.topbtn{
-  border:1px solid var(--border);
-  background:var(--panel2);
-  color:var(--text);
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:700
-}
-#searchWrap{
-  flex:1;
-  position:relative
-}
-#search{
-  width:100%;
-  background:#101a14;
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:11px 12px;
-  outline:none
-}
-#searchResults{
-  display:none;
-  position:absolute;
-  top:48px;
-  left:0;
-  right:0;
-  max-height:46vh;
-  overflow:auto;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  z-index:1200;
-  box-shadow:0 10px 30px rgba(0,0,0,.35)
-}
-.result{
-  padding:11px 12px;
-  border-bottom:1px solid var(--border)
-}
-.result:last-child{border-bottom:0}
-.result strong{display:block}
-.result small{color:var(--muted)}
-
-#map{
-  flex:1;
-  min-height:0;
-  background:#0f1712
+* {
+  box-sizing: border-box;
 }
 
-#drawer{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:1100;
-  background:rgba(20,32,25,.98);
-  border-top:1px solid var(--border);
-  border-radius:18px 18px 0 0;
-  transform:translateY(calc(100% - 56px));
-  transition:transform .22s ease;
-  max-height:72vh;
-  box-shadow:0 -12px 30px rgba(0,0,0,.35)
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #08130e;
+  color: #f5f5f5;
+  font-family: Arial, Helvetica, sans-serif;
 }
-#drawer.open{
-  transform:translateY(0)
-}
-#drawerHandle{
-  height:56px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  font-weight:800;
-  user-select:none
-}
-#drawerHandle::before{
-  content:"";
-  width:44px;
-  height:5px;
-  border-radius:99px;
-  background:#6e7b73;
-  position:absolute;
-  top:8px
-}
-#drawerContent{
-  padding:4px 12px calc(14px + env(safe-area-inset-bottom));
-  overflow:auto;
-  max-height:calc(72vh - 56px)
-}
-.section{
-  margin:10px 0 14px
-}
-.section h3{
-  margin:0 0 8px;
-  font-size:14px;
-  color:#dfe6e1;
-  text-transform:uppercase;
-  letter-spacing:.05em
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px
-}
-.control{
-  border:1px solid var(--border);
-  background:var(--panel2);
-  color:var(--text);
-  padding:11px;
-  border-radius:12px;
-  text-align:left;
-  font-weight:700
-}
-.control.active{
-  outline:2px solid var(--green)
-}
-.control small{
-  display:block;
-  color:var(--muted);
-  font-weight:500;
-  margin-top:3px
-}
-.switchrow{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 0;
-  border-bottom:1px solid var(--border)
-}
-.switchrow:last-child{border-bottom:0}
-.switchrow label{font-weight:700}
-.switchrow small{
-  display:block;
-  color:var(--muted);
-  font-weight:500
-}
-input[type=checkbox]{
-  width:20px;
-  height:20px;
-  accent-color:var(--green)
-}
-#status{
-  position:fixed;
-  left:50%;
-  bottom:68px;
-  transform:translateX(-50%);
-  z-index:1050;
-  background:rgba(0,0,0,.76);
-  color:white;
-  padding:8px 12px;
-  border-radius:999px;
-  font-size:13px;
-  display:none;
-  max-width:85vw;
-  text-align:center
-}
-.popup-card{min-width:220px}
-.popup-card h3{margin:0 0 4px}
-.popup-card p{
-  margin:4px 0;
-  color:#333
-}
-.popup-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  margin-top:8px
-}
-.popup-actions button,
-.popup-actions a{
-  border:0;
-  border-radius:8px;
-  padding:8px;
-  text-align:center;
-  text-decoration:none;
-  font-weight:700;
-  background:#1f5f34;
-  color:white
-}
-.popup-actions .danger{
-  background:#8c2e2e
-}
-.legend{
-  background:rgba(20,32,25,.95);
-  color:white;
-  padding:8px 10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  font-size:12px;
-  line-height:1.4
-}
-.dot{
-  display:inline-block;
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  margin-right:5px
-}
-.line{
-  display:inline-block;
-  width:18px;
-  height:4px;
-  border-radius:4px;
-  margin-right:5px;
-  vertical-align:middle
-}
-.pin-label{
-  background:#17251b;
-  color:white;
-  border:1px solid #506555;
-  border-radius:7px;
-  padding:2px 5px;
-  font-size:11px;
-  white-space:nowrap
-}
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:2000;
-  background:rgba(0,0,0,.7);
-  align-items:flex-end;
-  justify-content:center
-}
-.modal.show{display:flex}
-.modalbox{
-  width:min(720px,100%);
-  max-height:86vh;
-  overflow:auto;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:18px 18px 0 0;
-  padding:16px 14px calc(16px + env(safe-area-inset-bottom))
-}
-.modalbox h2{
-  margin:0 0 12px
-}
-.modalbox label{
-  display:block;
-  margin:10px 0 5px;
-  font-weight:700
-}
-.modalbox input,
-.modalbox select,
-.modalbox textarea{
-  width:100%;
-  background:#101a14;
-  color:white;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px
-}
-.modalbox textarea{
-  min-height:90px;
-  resize:vertical
-}
-.modal-actions{
-  display:flex;
-  gap:8px;
-  margin-top:14px
-}
-.modal-actions button{
-  flex:1;
-  border:0;
-  border-radius:10px;
-  padding:11px;
-  font-weight:800
-}
-.primary{
-  background:var(--green);
-  color:#061008
-}
-.secondary{
-  background:#314438;
-  color:white
-}
-.danger{
-  background:#8c2e2e;
-  color:white
-}
-#publicLandList{
-  max-height:280px;
-  overflow:auto;
-  border:1px solid var(--border);
-  border-radius:12px
-}
-.landrow{
-  padding:10px;
-  border-bottom:1px solid var(--border)
-}
-.landrow:last-child{
-  border-bottom:0
-}
-.landrow button{
-  width:100%;
-  text-align:left;
-  border:0;
-  background:transparent;
-  color:white;
-  padding:0
-}
-.landrow strong{display:block}
-.landrow small{color:var(--muted)}
 
-@media(min-width:850px){
-  #drawer{
-    left:12px;
-    right:auto;
-    width:390px;
-    bottom:12px;
-    border-radius:18px;
-    transform:translateY(calc(100% - 56px))
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#topBar {
+  height: 86px;
+  min-height: 86px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #0b1911;
+  border-bottom: 1px solid #26382d;
+  z-index: 3000;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.logo span {
+  color: #4fd06c;
+}
+
+.searchWrap {
+  flex: 1;
+  position: relative;
+}
+
+#searchBox {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #32493a;
+  border-radius: 14px;
+  background: #101e16;
+  color: white;
+  padding: 0 48px 0 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+#searchBtn {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: #243b2c;
+  color: white;
+  font-size: 20px;
+}
+
+#locateBtn {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 14px;
+  border: 1px solid #32493a;
+  background: #172a1e;
+  color: white;
+  font-size: 23px;
+}
+
+#mapWrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #142019;
+  z-index: 1;
+}
+
+.leaflet-container {
+  background: #142019 !important;
+}
+
+#resultsPanel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  max-height: 45%;
+  overflow-y: auto;
+  background: rgba(8, 19, 14, 0.96);
+  border: 1px solid #35503f;
+  border-radius: 16px;
+  z-index: 2000;
+  display: none;
+}
+
+.resultItem {
+  padding: 13px 14px;
+  border-bottom: 1px solid #25382c;
+  cursor: pointer;
+}
+
+.resultItem:last-child {
+  border-bottom: 0;
+}
+
+.resultTitle {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.resultSub {
+  color: #b8c5bc;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+#bottomSheet {
+  position: fixed;
+  z-index: 3500;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 92px;
+  background: #101f16;
+  border: 1px solid #32493a;
+  border-bottom: none;
+  border-radius: 28px 28px 0 0;
+  transition: height 0.25s ease;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+#bottomSheet.open {
+  height: min(72vh, 610px);
+}
+
+.sheetHandle {
+  width: 84px;
+  height: 7px;
+  border-radius: 10px;
+  background: #7c8d82;
+  margin: 12px auto 6px;
+}
+
+.sheetTitle {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+  padding: 3px 0 13px;
+  cursor: pointer;
+}
+
+.sheetBody {
+  height: calc(100% - 65px);
+  overflow-y: auto;
+  padding: 0 16px 30px;
+}
+
+.toolGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.toolBtn {
+  min-height: 52px;
+  border: 1px solid #35503f;
+  border-radius: 14px;
+  background: #182b1f;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.toolBtn.active {
+  outline: 2px solid #50ce6c;
+}
+
+.section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #2b4033;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+#publicLandList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landBtn {
+  text-align: left;
+  border: 1px solid #314b3a;
+  background: #13251a;
+  color: white;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.landBtn strong {
+  display: block;
+  font-size: 15px;
+}
+
+.landBtn small {
+  display: block;
+  margin-top: 3px;
+  color: #b5c4ba;
+}
+
+.infoBox {
+  display: none;
+  background: #0d1a12;
+  border: 1px solid #36523f;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 12px;
+  line-height: 1.45;
+}
+
+.infoBox.show {
+  display: block;
+}
+
+.pinPopup button {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px;
+  border: 0;
+  border-radius: 7px;
+}
+
+.trailLine {
+  stroke-dasharray: 7 5;
+}
+
+.customPin {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% 50% 50% 0;
+  background: #ff7c32;
+  border: 3px solid white;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 7px rgba(0,0,0,.5);
+}
+
+.customPin:after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: white;
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  border-radius: 50%;
+}
+
+.leaflet-control-zoom {
+  margin-bottom: 105px !important;
+}
+
+@media (max-width: 520px) {
+  #topBar {
+    padding: 10px 10px;
   }
-  #drawerContent{
-    max-height:65vh
+
+  .logo {
+    font-size: 24px;
+  }
+
+  #searchBox {
+    font-size: 14px;
   }
 }
 </style>
@@ -378,2846 +324,696 @@ input[type=checkbox]{
 
 <body>
 
-<div id="app">
+<header id="topBar">
+  <div class="logo">Hunt<span>Land</span></div>
 
-<div id="topbar">
+  <div class="searchWrap">
+    <input
+      id="searchBox"
+      type="text"
+      placeholder="Search public land, trail, refuge..."
+      autocomplete="off"
+    >
+    <button id="searchBtn">⌕</button>
+  </div>
 
-<div class="brand">
-Hunt<span>Land</span>
+  <button id="locateBtn" title="My Location">◎</button>
+</header>
+
+<div id="mapWrap">
+  <div id="map"></div>
+  <div id="resultsPanel"></div>
 </div>
 
-<div id="searchWrap">
-<input
-id="search"
-placeholder="Search public land, trail, refuge, forest..."
->
-<div id="searchResults"></div>
+<div id="bottomSheet">
+  <div class="sheetHandle"></div>
+  <div id="sheetTitle" class="sheetTitle">Map Tools</div>
+
+  <div class="sheetBody">
+
+    <div class="toolGrid">
+      <button id="pinTool" class="toolBtn">📍 Drop Pin</button>
+      <button id="trailsTool" class="toolBtn active">🥾 Trails</button>
+      <button id="launchTool" class="toolBtn active">🚤 Boat Launches</button>
+      <button id="probabilityTool" class="toolBtn active">🦌 Deer Areas</button>
+      <button id="landTool" class="toolBtn active">🗺 Public Land</button>
+      <button id="satelliteTool" class="toolBtn">🛰 Satellite</button>
+      <button id="infoTool" class="toolBtn">ℹ Land Info</button>
+      <button id="regTool" class="toolBtn">📖 Regulations</button>
+    </div>
+
+    <div id="infoBox" class="infoBox"></div>
+
+    <div class="section">
+      <div class="sectionTitle">Public Land</div>
+      <div id="publicLandList"></div>
+    </div>
+
+  </div>
 </div>
 
-<button id="locateBtn" class="topbtn">
-◎
-</button>
-
-</div>
-
-<div id="map"></div>
-
-</div>
-
-<div id="status"></div>
-
-<div id="drawer">
-
-<div id="drawerHandle">
-Map Tools
-</div>
-
-<div id="drawerContent">
-
-<div class="section">
-
-<h3>Pin Tool</h3>
-
-<div class="grid" id="pinTypes">
-
-<button class="control active" data-pin="Stand">
-📍 Stand
-<small>tree stand / blind</small>
-</button>
-
-<button class="control" data-pin="Deer">
-🦌 Deer
-<small>sighting / sign</small>
-</button>
-
-<button class="control" data-pin="Turkey">
-🦃 Turkey
-<small>bird / sign</small>
-</button>
-
-<button class="control" data-pin="Trail Camera">
-📷 Camera
-<small>camera location</small>
-</button>
-
-<button class="control" data-pin="Parking">
-🅿️ Parking
-<small>truck / access</small>
-</button>
-
-<button class="control" data-pin="Other">
-⭐ Other
-<small>custom note</small>
-</button>
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>Drop pins by tapping map</label>
-<small>
-Turn off when you are just browsing
-</small>
-</div>
-
-<input id="pinMode" type="checkbox">
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h3>Map Layers</h3>
-
-<div class="switchrow">
-
-<div>
-<label>Wildlife Refuges</label>
-<small>
-Official U.S. Fish & Wildlife Service boundaries
-</small>
-</div>
-
-<input
-id="refugeToggle"
-type="checkbox"
-checked
->
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>National Forests</label>
-<small>
-Official U.S. Forest Service boundaries
-</small>
-</div>
-
-<input
-id="forestToggle"
-type="checkbox"
-checked
->
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>Public / Protected Land</label>
-<small>
-Mapped protected areas in current map view
-</small>
-</div>
-
-<input
-id="osmLandToggle"
-type="checkbox"
-checked
->
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>Trails</label>
-<small>
-Loads mapped trails in current map view
-</small>
-</div>
-
-<input
-id="trailToggle"
-type="checkbox"
-checked
->
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>Boat Launches</label>
-<small>
-Loads mapped boat ramps in current map view
-</small>
-</div>
-
-<input
-id="boatToggle"
-type="checkbox"
-checked
->
-
-</div>
-
-<div class="switchrow">
-
-<div>
-<label>Deer Probability</label>
-<small>
-Purple scouting overlay
-</small>
-</div>
-
-<input
-id="deerToggle"
-type="checkbox"
->
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h3>Public Land List</h3>
-
-<div
-class="grid"
-style="margin-bottom:8px"
->
-
-<select
-id="stateFilter"
-class="control"
-style="width:100%"
->
-
-<option value="ALL">
-All states in view
-</option>
-
-<option>LA</option>
-<option>MS</option>
-<option>AL</option>
-<option>AR</option>
-<option>TX</option>
-<option>FL</option>
-<option>GA</option>
-<option>TN</option>
-<option>OK</option>
-<option>MO</option>
-
-</select>
-
-<button
-id="refreshLand"
-class="control"
->
-↻ Refresh list
-</button>
-
-</div>
-
-<div id="publicLandList"></div>
-
-</div>
-
-<div class="section">
-
-<h3>Basemap</h3>
-
-<div class="grid">
-
-<button
-class="control active"
-data-base="street"
->
-Street
-</button>
-
-<button
-class="control"
-data-base="satellite"
->
-Satellite
-</button>
-
-<button
-class="control"
-data-base="topo"
->
-Topo
-</button>
-
-<button
-id="clearPins"
-class="control"
->
-Clear My Pins
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div
-id="pinModal"
-class="modal"
->
-
-<div class="modalbox">
-
-<h2 id="pinModalTitle">
-Add Pin
-</h2>
-
-<label>Type</label>
-
-<select id="pinTypeEdit">
-
-<option>Stand</option>
-<option>Deer</option>
-<option>Turkey</option>
-<option>Trail Camera</option>
-<option>Parking</option>
-<option>Other</option>
-
-</select>
-
-<label>Name</label>
-
-<input
-id="pinName"
-placeholder="Example: Oak ridge stand"
->
-
-<label>Notes</label>
-
-<textarea
-id="pinNotes"
-placeholder="Wind, access, deer sign, etc."
-></textarea>
-
-<div class="modal-actions">
-
-<button
-id="savePin"
-class="primary"
->
-Save
-</button>
-
-<button
-id="cancelPin"
-class="secondary"
->
-Cancel
-</button>
-
-<button
-id="deletePin"
-class="danger"
-style="display:none"
->
-Delete
-</button>
-
-</div>
-
-</div>
-
-</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-
-const $ = id =>
-document.getElementById(id);
-
-const statusEl =
-$("status");
-
-let statusTimer;
-
-function status(msg,ms=2200){
-
-clearTimeout(statusTimer);
-
-statusEl.textContent=msg;
-
-statusEl.style.display=
-"block";
-
-statusTimer=setTimeout(
-()=>statusEl.style.display="none",
-ms
-);
-
-}
-
-const map=L.map(
-"map",
-{
-zoomControl:false,
-preferCanvas:true
-}
-).setView(
-[31.45,-91.25],
-7
-);
-
-L.control.zoom({
-position:"bottomright"
-}).addTo(map);
-
-const baseLayers={
-
-street:
-L.tileLayer(
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-{
-maxZoom:19,
-attribution:"© OpenStreetMap"
-}
-),
-
-satellite:
-L.tileLayer(
-"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-{
-maxZoom:19,
-attribution:"Tiles © Esri"
-}
-),
-
-topo:
-L.tileLayer(
-"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-{
-maxZoom:17,
-attribution:"© OpenTopoMap"
-}
-)
-
-};
-
-let currentBase=
-baseLayers.street.addTo(map);
-
-const refugeLayer=
-L.geoJSON(
-null,
-{
-style:{
-color:"#54a7ff",
-weight:2,
-fillColor:"#54a7ff",
-fillOpacity:.09
-},
-onEachFeature:
-(f,l)=>
-wirePublicPopup(
-f,
-l,
-"National Wildlife Refuge / FWS"
-)
-}
-).addTo(map);
-
-const forestLayer=
-L.geoJSON(
-null,
-{
-style:{
-color:"#55c96f",
-weight:2,
-fillColor:"#55c96f",
-fillOpacity:.08
-},
-onEachFeature:
-(f,l)=>
-wirePublicPopup(
-f,
-l,
-"National Forest / USFS"
-)
-}
-).addTo(map);
-
-const osmLandLayer=
-L.geoJSON(
-null,
-{
-style:{
-color:"#ff9f43",
-weight:2,
-fillColor:"#ff9f43",
-fillOpacity:.06
-},
-onEachFeature:
-(f,l)=>
-wirePublicPopup(
-f,
-l,
-"Public / Protected Land"
-)
-}
-).addTo(map);
-
-const trailLayer=
-L.geoJSON(
-null,
-{
-style:f=>({
-color:
-f.properties?.highway==="cycleway"
-?"#54a7ff"
-:"#ffd15c",
-weight:3,
-opacity:.9,
-dashArray:
-f.properties?.highway==="path"
-?"6 4"
-:null
-}),
-onEachFeature:(f,l)=>{
-
-const p=f.properties||{};
-
-const name=
-escapeHtml(
-p.name||
-"Mapped Trail"
-);
-
-const bike=
-p.bicycle||
-p["mtb:scale"]||
-"unknown";
-
-l.bindPopup(
-`<div class="popup-card">
-<h3>${name}</h3>
-<p><b>Trail type:</b> ${escapeHtml(p.highway||"trail")}</p>
-<p><b>Bicycle/e-bike tagging:</b> ${escapeHtml(String(bike))}</p>
-<p>Always verify local motorized/e-bike rules before riding.</p>
-</div>`
-);
-
-}
-}
-).addTo(map);
-
-const boatLayer=
-L.geoJSON(
-null,
-{
-pointToLayer:
-(f,ll)=>
-L.circleMarker(
-ll,
-{
-radius:7,
-color:"#fff",
-weight:2,
-fillColor:"#54a7ff",
-fillOpacity:1
-}
-),
-onEachFeature:(f,l)=>{
-
-const p=
-f.properties||{};
-
-l.bindPopup(
-`<div class="popup-card">
-<h3>${escapeHtml(p.name||"Boat Launch")}</h3>
-<p>Mapped boat ramp / launch.</p>
-</div>`
-);
-
-}
-}
-).addTo(map);
-
-const deerLayer=
-L.layerGroup();
-
-const pinLayer=
-L.layerGroup().addTo(map);
-
-const userPins=
-JSON.parse(
-localStorage.getItem(
-"huntlandPins"
-)||"[]"
-);
-
-let selectedPinType=
-"Stand";
-
-let pendingLatLng=
-null;
-
-let editingPinId=
-null;
-
-let visiblePublicLands=
-[];
-
-let searchIndex=
-[];
-
-function escapeHtml(v){
-
-return String(v??"")
-.replace(
-/[&<>"']/g,
-s=>({
-"&":"&amp;",
-"<":"&lt;",
-">":"&gt;",
-"\"":"&quot;",
-"'":"&#039;"
-}[s])
-);
-
-}
-
-function propName(p={}){
-
-return(
-p.ORGNAME||
-p.REFUGENAME||
-p.UNITNAME||
-p.FORESTNAME||
-p.COMMONNAME||
-p.name||
-p.Name||
-p.Unit_Nm||
-"Public Land"
-);
-
-}
-
-function wirePublicPopup(
-f,
-l,
-typeLabel
-){
-
-const p=
-f.properties||{};
-
-const name=
-propName(p);
-
-const url=
-regulationUrlFor(
-name,
-typeLabel,
-p
-);
-
-l.bindPopup(
-`<div class="popup-card">
-<h3>${escapeHtml(name)}</h3>
-<p><b>${escapeHtml(typeLabel)}</b></p>
-<p>Check current seasons, permits, weapon rules and access before hunting.</p>
-<div class="popup-actions">
-<a href="${url}" target="_blank" rel="noopener">Regulations</a>
-<button onclick="zoomToLayerByName('${encodeURIComponent(name)}')">Zoom</button>
-</div>
-</div>`
-);
-
-}
-
-function regulationUrlFor(
-name,
-type,
-p={}
-){
-
-const n=
-name.toLowerCase();
-
-if(
-n.includes("richard k. yancey")||
-n.includes("richard k yancey")
-)
-return "https://www.wlf.louisiana.gov/page/richard-k-yancey";
-
-if(
-n.includes("panther swamp")
-)
-return "https://www.fws.gov/refuge/panther-swamp";
-
-if(
-type.includes("FWS")
-)
-return "https://www.fws.gov/refuges";
-
-if(
-type.includes("USFS")
-)
-return "https://www.fs.usda.gov/";
-
-return "https://www.google.com/search?q="+
-encodeURIComponent(
-name+
-" hunting regulations"
-);
-
-}
-
-window.zoomToLayerByName=
-function(encoded){
-
-const name=
-decodeURIComponent(encoded);
-
-const layers=[
-refugeLayer,
-forestLayer,
-osmLandLayer
-];
-
-for(
-const group of layers
-){
-
-group.eachLayer(
-l=>{
-
-if(
-propName(
-l.feature?.properties||{}
-)===name
-){
-
-try{
-
-map.fitBounds(
-l.getBounds(),
-{
-padding:[30,30]
-}
-);
-
-}catch{}
-
-}
-
-}
-);
-
-}
-
-};
-
-function savePins(){
-
-localStorage.setItem(
-"huntlandPins",
-JSON.stringify(userPins)
-);
-
-}
-
-function pinColor(type){
-
-return(
-{
-Stand:"#55c96f",
-Deer:"#b84cff",
-Turkey:"#ff9f43",
-"Trail Camera":"#54a7ff",
-Parking:"#e9e9e9",
-Other:"#ff6464"
-}[type]
-||
-"#fff"
-);
-
-}
-
-function renderPins(){
-
-pinLayer.clearLayers();
-
-userPins.forEach(
-pin=>{
-
-const marker=
-L.circleMarker(
-[pin.lat,pin.lng],
-{
-radius:9,
-color:"#0b0b0b",
-weight:2,
-fillColor:
-pinColor(pin.type),
-fillOpacity:1
-}
-).addTo(pinLayer);
-
-marker.bindTooltip(
-escapeHtml(
-pin.name||
-pin.type
-),
-{
-permanent:false,
-direction:"top",
-className:"pin-label"
-}
-);
-
-marker.bindPopup(
-`<div class="popup-card">
-<h3>${escapeHtml(pin.name||pin.type)}</h3>
-<p><b>${escapeHtml(pin.type)}</b></p>
-<p>${escapeHtml(pin.notes||"No notes")}</p>
-<div class="popup-actions">
-<button onclick="editPin('${pin.id}')">Edit</button>
-<button class="danger" onclick="removePin('${pin.id}')">Delete</button>
-</div>
-</div>`
-);
-
-}
-);
-
-}
-
-window.editPin=
-function(id){
-
-const pin=
-userPins.find(
-x=>x.id===id
-);
-
-if(!pin)return;
-
-editingPinId=id;
-
-pendingLatLng={
-lat:pin.lat,
-lng:pin.lng
-};
-
-$("pinModalTitle").textContent=
-"Edit Pin";
-
-$("pinTypeEdit").value=
-pin.type;
-
-$("pinName").value=
-pin.name||"";
-
-$("pinNotes").value=
-pin.notes||"";
-
-$("deletePin").style.display=
-"block";
-
-$("pinModal").classList.add(
-"show"
-);
-
-};
-
-window.removePin=
-function(id){
-
-const i=
-userPins.findIndex(
-x=>x.id===id
-);
-
-if(i>=0){
-
-userPins.splice(
-i,
-1
-);
-
-savePins();
-
-renderPins();
-
-map.closePopup();
-
-status(
-"Pin deleted"
-);
-
-}
-
-};
-
-renderPins();
-
-map.on(
-"click",
-e=>{
-
-if(
-!$("pinMode").checked
-)
-return;
-
-pendingLatLng=
-e.latlng;
-
-editingPinId=
-null;
-
-$("pinModalTitle").textContent=
-"Add Pin";
-
-$("pinTypeEdit").value=
-selectedPinType;
-
-$("pinName").value=
-"";
-
-$("pinNotes").value=
-"";
-
-$("deletePin").style.display=
-"none";
-
-$("pinModal").classList.add(
-"show"
-);
-
-}
-);
-  
-
-$("savePin").onclick=()=>{
-
-if(!pendingLatLng)
-return;
-
-const data={
-
-type:
-$("pinTypeEdit").value,
-
-name:
-$("pinName").value.trim(),
-
-notes:
-$("pinNotes").value.trim(),
-
-lat:
-+pendingLatLng.lat,
-
-lng:
-+pendingLatLng.lng
-
-};
-
-if(editingPinId){
-
-const p=
-userPins.find(
-x=>x.id===editingPinId
-);
-
-if(p)
-Object.assign(
-p,
-data
-);
-
-}else{
-
-userPins.push({
-
-id:
-(
-crypto.randomUUID?.()
-||
-Date.now()+
-"-"+
-Math.random()
-),
-
-...data
+document.addEventListener("DOMContentLoaded", function () {
+
+  const mapElement = document.getElementById("map");
+
+  if (!mapElement) {
+    alert("Map container not found.");
+    return;
+  }
+
+  const map = L.map("map", {
+    zoomControl: true,
+    attributionControl: true
+  }).setView([31.35, -91.15], 7);
+
+  const streetLayer = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }
+  );
+
+  const topoLayer = L.tileLayer(
+    "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 17,
+      attribution: "Map data &copy; OpenStreetMap contributors"
+    }
+  );
+
+  const satelliteLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Tiles &copy; Esri"
+    }
+  );
+
+  streetLayer.addTo(map);
+
+  const publicLandLayer = L.layerGroup().addTo(map);
+  const trailsLayer = L.layerGroup().addTo(map);
+  const launchLayer = L.layerGroup().addTo(map);
+  const probabilityLayer = L.layerGroup().addTo(map);
+  const userPinsLayer = L.layerGroup().addTo(map);
+
+  const publicLands = [
+    {
+      id: "rky",
+      name: "Richard K. Yancey WMA",
+      state: "Louisiana",
+      type: "Wildlife Management Area",
+      lat: 31.0008,
+      lng: -91.7216,
+      zoom: 12,
+      regulations: "Check current LDWF regulations, season dates, WMA rules, permits, weapon restrictions and access rules before hunting.",
+      description: "Large Louisiana WMA in the Mississippi/Red River floodplain region."
+    },
+    {
+      id: "panther",
+      name: "Panther Swamp National Wildlife Refuge",
+      state: "Mississippi",
+      type: "National Wildlife Refuge",
+      lat: 32.762,
+      lng: -90.59,
+      zoom: 11,
+      regulations: "Federal refuge rules apply in addition to applicable Mississippi hunting regulations. Verify current refuge-specific seasons, access and permit requirements.",
+      description: "National Wildlife Refuge in the Mississippi Delta."
+    },
+    {
+      id: "homochitto",
+      name: "Homochitto National Forest",
+      state: "Mississippi",
+      type: "National Forest",
+      lat: 31.43,
+      lng: -90.93,
+      zoom: 10,
+      regulations: "National Forest hunting is generally governed by Mississippi seasons plus any federal or site-specific restrictions. Always verify the current regulations.",
+      description: "National Forest in southwest Mississippi."
+    },
+    {
+      id: "desoto",
+      name: "De Soto National Forest",
+      state: "Mississippi",
+      type: "National Forest",
+      lat: 31.11,
+      lng: -89.10,
+      zoom: 9,
+      regulations: "Verify current Mississippi hunting seasons and any De Soto National Forest closures or special rules.",
+      description: "National Forest in southern Mississippi."
+    },
+    {
+      id: "delta",
+      name: "Delta National Forest",
+      state: "Mississippi",
+      type: "National Forest",
+      lat: 32.78,
+      lng: -90.74,
+      zoom: 11,
+      regulations: "Verify current Mississippi hunting regulations and federal forest restrictions before hunting.",
+      description: "Bottomland hardwood National Forest in the Mississippi Delta."
+    },
+    {
+      id: "kisatchie",
+      name: "Kisatchie National Forest",
+      state: "Louisiana",
+      type: "National Forest",
+      lat: 31.30,
+      lng: -92.52,
+      zoom: 8,
+      regulations: "Louisiana hunting seasons apply along with any Kisatchie National Forest-specific restrictions or closures.",
+      description: "Louisiana's National Forest system."
+    }
+  ];
+
+  let selectedLand = null;
+  let pinMode = false;
+  let satelliteOn = false;
+
+  const landMarkers = {};
+
+  function addPublicLandMarkers() {
+    publicLands.forEach(function (land) {
+      const marker = L.circleMarker([land.lat, land.lng], {
+        radius: 10,
+        color: "#ffffff",
+        weight: 2,
+        fillColor: "#35c75a",
+        fillOpacity: 0.9
+      });
+
+      marker.bindPopup(
+        "<b>" + land.name + "</b><br>" +
+        land.type + "<br>" +
+        land.state
+      );
+
+      marker.on("click", function () {
+        selectedLand = land;
+      });
+
+      marker.addTo(publicLandLayer);
+      landMarkers[land.id] = marker;
+    });
+  }
+
+  addPublicLandMarkers();
+
+  const trailData = [
+    {
+      name: "Richard K. Yancey Access Route",
+      points: [
+        [31.017, -91.736],
+        [31.011, -91.724],
+        [31.002, -91.713],
+        [30.993, -91.704]
+      ]
+    },
+    {
+      name: "Panther Swamp Access Route",
+      points: [
+        [32.79, -90.61],
+        [32.775, -90.598],
+        [32.758, -90.585],
+        [32.744, -90.571]
+      ]
+    }
+  ];
+
+  trailData.forEach(function (trail) {
+    L.polyline(trail.points, {
+      color: "#f5a623",
+      weight: 4,
+      opacity: 0.95,
+      className: "trailLine"
+    })
+    .bindPopup("<b>" + trail.name + "</b>")
+    .addTo(trailsLayer);
+  });
+
+  const launches = [
+    {
+      name: "Richard K. Yancey Area Boat Access",
+      lat: 31.008,
+      lng: -91.746
+    },
+    {
+      name: "Panther Swamp Area Boat Access",
+      lat: 32.766,
+      lng: -90.618
+    }
+  ];
+
+  launches.forEach(function (launch) {
+    L.circleMarker([launch.lat, launch.lng], {
+      radius: 8,
+      color: "#ffffff",
+      weight: 2,
+      fillColor: "#3298ff",
+      fillOpacity: 1
+    })
+    .bindPopup("🚤 <b>" + launch.name + "</b>")
+    .addTo(launchLayer);
+  });
+
+  const deerAreas = [
+    {
+      name: "Richard K. Yancey Deer Habitat Zone",
+      center: [31.004, -91.718],
+      radius: 2200
+    },
+    {
+      name: "Panther Swamp Deer Habitat Zone",
+      center: [32.761, -90.584],
+      radius: 2800
+    }
+  ];
+
+  deerAreas.forEach(function (area) {
+    L.circle(area.center, {
+      radius: area.radius,
+      color: "#b94cff",
+      weight: 2,
+      fillColor: "#b94cff",
+      fillOpacity: 0.19
+    })
+    .bindPopup(
+      "<b>" + area.name + "</b><br>" +
+      "Purple areas are habitat-oriented map highlights, not guaranteed deer locations."
+    )
+    .addTo(probabilityLayer);
+  });
+
+  const publicLandList = document.getElementById("publicLandList");
+
+  publicLands.forEach(function (land) {
+    const button = document.createElement("button");
+    button.className = "landBtn";
+
+    button.innerHTML =
+      "<strong>" + land.name + "</strong>" +
+      "<small>" + land.type + " · " + land.state + "</small>";
+
+    button.addEventListener("click", function () {
+      selectedLand = land;
+
+      map.flyTo(
+        [land.lat, land.lng],
+        land.zoom,
+        {
+          duration: 1.1
+        }
+      );
+
+      if (landMarkers[land.id]) {
+        setTimeout(function () {
+          landMarkers[land.id].openPopup();
+        }, 900);
+      }
+
+      closeSheet();
+    });
+
+    publicLandList.appendChild(button);
+  });
+
+  const bottomSheet = document.getElementById("bottomSheet");
+  const sheetTitle = document.getElementById("sheetTitle");
+
+  function openSheet() {
+    bottomSheet.classList.add("open");
+
+    setTimeout(function () {
+      map.invalidateSize();
+    }, 280);
+  }
+
+  function closeSheet() {
+    bottomSheet.classList.remove("open");
+
+    setTimeout(function () {
+      map.invalidateSize();
+    }, 280);
+  }
+
+  sheetTitle.addEventListener("click", function () {
+    if (bottomSheet.classList.contains("open")) {
+      closeSheet();
+    } else {
+      openSheet();
+    }
+  });
+
+  document.querySelector(".sheetHandle").addEventListener("click", function () {
+    if (bottomSheet.classList.contains("open")) {
+      closeSheet();
+    } else {
+      openSheet();
+    }
+  });
+    const trailsTool = document.getElementById("trailsTool");
+  const launchTool = document.getElementById("launchTool");
+  const probabilityTool = document.getElementById("probabilityTool");
+  const landTool = document.getElementById("landTool");
+  const satelliteTool = document.getElementById("satelliteTool");
+  const pinTool = document.getElementById("pinTool");
+  const infoTool = document.getElementById("infoTool");
+  const regTool = document.getElementById("regTool");
+  const infoBox = document.getElementById("infoBox");
+
+  trailsTool.addEventListener("click", function () {
+    if (map.hasLayer(trailsLayer)) {
+      map.removeLayer(trailsLayer);
+      trailsTool.classList.remove("active");
+    } else {
+      trailsLayer.addTo(map);
+      trailsTool.classList.add("active");
+    }
+  });
+
+  launchTool.addEventListener("click", function () {
+    if (map.hasLayer(launchLayer)) {
+      map.removeLayer(launchLayer);
+      launchTool.classList.remove("active");
+    } else {
+      launchLayer.addTo(map);
+      launchTool.classList.add("active");
+    }
+  });
+
+  probabilityTool.addEventListener("click", function () {
+    if (map.hasLayer(probabilityLayer)) {
+      map.removeLayer(probabilityLayer);
+      probabilityTool.classList.remove("active");
+    } else {
+      probabilityLayer.addTo(map);
+      probabilityTool.classList.add("active");
+    }
+  });
+
+  landTool.addEventListener("click", function () {
+    if (map.hasLayer(publicLandLayer)) {
+      map.removeLayer(publicLandLayer);
+      landTool.classList.remove("active");
+    } else {
+      publicLandLayer.addTo(map);
+      landTool.classList.add("active");
+    }
+  });
+
+  satelliteTool.addEventListener("click", function () {
+    satelliteOn = !satelliteOn;
+
+    if (satelliteOn) {
+      if (map.hasLayer(streetLayer)) {
+        map.removeLayer(streetLayer);
+      }
+
+      if (map.hasLayer(topoLayer)) {
+        map.removeLayer(topoLayer);
+      }
+
+      satelliteLayer.addTo(map);
+      satelliteTool.classList.add("active");
+    } else {
+      if (map.hasLayer(satelliteLayer)) {
+        map.removeLayer(satelliteLayer);
+      }
+
+      streetLayer.addTo(map);
+      satelliteTool.classList.remove("active");
+    }
+  });
+
+  pinTool.addEventListener("click", function () {
+    pinMode = !pinMode;
+
+    if (pinMode) {
+      pinTool.classList.add("active");
+      pinTool.textContent = "📍 Tap Map";
+      closeSheet();
+    } else {
+      pinTool.classList.remove("active");
+      pinTool.textContent = "📍 Drop Pin";
+    }
+  });
+
+  const pinIcon = L.divIcon({
+    className: "",
+    html: '<div class="customPin"></div>',
+    iconSize: [30, 38],
+    iconAnchor: [15, 34]
+  });
+
+  map.on("click", function (event) {
+    if (!pinMode) return;
+
+    const marker = L.marker(event.latlng, {
+      icon: pinIcon,
+      draggable: true
+    }).addTo(userPinsLayer);
+
+    marker.bindPopup(
+      '<div class="pinPopup">' +
+      '<b>My Hunting Pin</b><br>' +
+      'Lat: ' + event.latlng.lat.toFixed(5) + '<br>' +
+      'Lng: ' + event.latlng.lng.toFixed(5) + '<br>' +
+      '<button onclick="this.closest(\'.leaflet-popup\').remove()">Close</button>' +
+      '</div>'
+    );
+
+    marker.openPopup();
+
+    pinMode = false;
+    pinTool.classList.remove("active");
+    pinTool.textContent = "📍 Drop Pin";
+  });
+
+  infoTool.addEventListener("click", function () {
+    openSheet();
+
+    if (!selectedLand) {
+      infoBox.innerHTML =
+        "<b>Select a public land area first.</b><br>" +
+        "Tap a public-land marker or choose an area from the Public Land list.";
+
+      infoBox.classList.add("show");
+      return;
+    }
+
+    infoBox.innerHTML =
+      "<b>" + selectedLand.name + "</b><br><br>" +
+      "<b>Type:</b> " + selectedLand.type + "<br>" +
+      "<b>State:</b> " + selectedLand.state + "<br><br>" +
+      selectedLand.description;
+
+    infoBox.classList.add("show");
+  });
+
+  regTool.addEventListener("click", function () {
+    openSheet();
+
+    if (!selectedLand) {
+      infoBox.innerHTML =
+        "<b>Select a public land area first.</b><br>" +
+        "Then tap Regulations.";
+
+      infoBox.classList.add("show");
+      return;
+    }
+
+    infoBox.innerHTML =
+      "<b>" + selectedLand.name + " Regulations</b><br><br>" +
+      selectedLand.regulations +
+      "<br><br><b>Important:</b> Always confirm current official regulations before hunting because seasons, permits, closures and weapon rules can change.";
+
+    infoBox.classList.add("show");
+  });
+
+  document.getElementById("locateBtn").addEventListener("click", function () {
+    if (!navigator.geolocation) {
+      alert("Location is not supported on this device.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        map.flyTo([lat, lng], 14);
+
+        L.circleMarker([lat, lng], {
+          radius: 9,
+          color: "#ffffff",
+          weight: 3,
+          fillColor: "#2e8cff",
+          fillOpacity: 1
+        })
+        .bindPopup("<b>Your Location</b>")
+        .addTo(map)
+        .openPopup();
+      },
+
+      function () {
+        alert(
+          "Your location could not be found. Make sure Safari has permission to use your location."
+        );
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 10000
+      }
+    );
+  });
+
+  const searchBox = document.getElementById("searchBox");
+  const searchBtn = document.getElementById("searchBtn");
+  const resultsPanel = document.getElementById("resultsPanel");
+
+  function runSearch() {
+    const query = searchBox.value.trim().toLowerCase();
+
+    resultsPanel.innerHTML = "";
+
+    if (!query) {
+      resultsPanel.style.display = "none";
+      return;
+    }
+
+    const results = publicLands.filter(function (land) {
+      return (
+        land.name.toLowerCase().includes(query) ||
+        land.state.toLowerCase().includes(query) ||
+        land.type.toLowerCase().includes(query)
+      );
+    });
+
+    if (results.length === 0) {
+      resultsPanel.innerHTML =
+        '<div class="resultItem">' +
+        '<div class="resultTitle">No matching public land found</div>' +
+        '<div class="resultSub">Try another name.</div>' +
+        '</div>';
+
+      resultsPanel.style.display = "block";
+      return;
+    }
+
+    results.forEach(function (land) {
+      const item = document.createElement("div");
+      item.className = "resultItem";
+
+      item.innerHTML =
+        '<div class="resultTitle">' + land.name + '</div>' +
+        '<div class="resultSub">' +
+        land.type + " · " + land.state +
+        '</div>';
+
+      item.addEventListener("click", function () {
+        selectedLand = land;
+
+        map.flyTo(
+          [land.lat, land.lng],
+          land.zoom,
+          {
+            duration: 1
+          }
+        );
+
+        resultsPanel.style.display = "none";
+        searchBox.value = "";
+
+        if (landMarkers[land.id]) {
+          setTimeout(function () {
+            landMarkers[land.id].openPopup();
+          }, 800);
+        }
+      });
+
+      resultsPanel.appendChild(item);
+    });
+
+    resultsPanel.style.display = "block";
+  }
+
+  searchBtn.addEventListener("click", runSearch);
+
+  searchBox.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      runSearch();
+    }
+  });
+
+  searchBox.addEventListener("input", function () {
+    if (!searchBox.value.trim()) {
+      resultsPanel.style.display = "none";
+    }
+  });
+
+  L.control.layers(
+    {
+      "Street Map": streetLayer,
+      "Topographic": topoLayer,
+      "Satellite": satelliteLayer
+    },
+    {
+      "Public Land": publicLandLayer,
+      "Trails": trailsLayer,
+      "Boat Launches": launchLayer,
+      "Deer Areas": probabilityLayer,
+      "My Pins": userPinsLayer
+    },
+    {
+      position: "topright",
+      collapsed: true
+    }
+  ).addTo(map);
+
+  function resizeMap() {
+    const topBarHeight =
+      document.getElementById("topBar").getBoundingClientRect().height;
+
+    const availableHeight =
+      window.innerHeight - topBarHeight;
+
+    document.getElementById("mapWrap").style.height =
+      availableHeight + "px";
+
+    map.invalidateSize(true);
+  }
+
+  resizeMap();
+
+  window.addEventListener("resize", function () {
+    resizeMap();
+  });
+
+  window.addEventListener("orientationchange", function () {
+    setTimeout(function () {
+      resizeMap();
+      map.invalidateSize(true);
+    }, 300);
+  });
+
+  setTimeout(function () {
+    map.invalidateSize(true);
+  }, 100);
+
+  setTimeout(function () {
+    map.invalidateSize(true);
+  }, 500);
+
+  setTimeout(function () {
+    map.invalidateSize(true);
+  }, 1200);
 
 });
-
-}
-
-savePins();
-
-renderPins();
-
-$("pinModal").classList.remove(
-"show"
-);
-
-status(
-editingPinId
-?"Pin updated"
-:"Pin saved"
-);
-
-editingPinId=
-null;
-
-};
-
-$("cancelPin").onclick=
-()=>{
-
-$("pinModal").classList.remove(
-"show"
-);
-
-};
-
-$("deletePin").onclick=
-()=>{
-
-if(editingPinId)
-removePin(
-editingPinId
-);
-
-$("pinModal").classList.remove(
-"show"
-);
-
-};
-
-$("pinModal").addEventListener(
-"click",
-e=>{
-
-if(
-e.target===
-$("pinModal")
-)
-$("pinModal").classList.remove(
-"show"
-);
-
-}
-);
-
-document.querySelectorAll(
-"#pinTypes .control"
-).forEach(
-btn=>{
-
-btn.onclick=
-()=>{
-
-document.querySelectorAll(
-"#pinTypes .control"
-).forEach(
-b=>
-b.classList.remove(
-"active"
-)
-);
-
-btn.classList.add(
-"active"
-);
-
-selectedPinType=
-btn.dataset.pin;
-
-$("pinMode").checked=
-true;
-
-status(
-"Tap the map to add a "+
-selectedPinType+
-" pin"
-);
-
-};
-
-}
-);
-
-$("drawerHandle").onclick=
-()=>{
-
-$("drawer").classList.toggle(
-"open"
-);
-
-};
-
-document.querySelectorAll(
-"[data-base]"
-).forEach(
-btn=>{
-
-btn.onclick=
-()=>{
-
-map.removeLayer(
-currentBase
-);
-
-currentBase=
-baseLayers[
-btn.dataset.base
-].addTo(map);
-
-document.querySelectorAll(
-"[data-base]"
-).forEach(
-b=>
-b.classList.remove(
-"active"
-)
-);
-
-btn.classList.add(
-"active"
-);
-
-};
-
-}
-);
-
-$("clearPins").onclick=
-()=>{
-
-if(
-confirm(
-"Delete all of your saved HuntLand pins on this device?"
-)
-){
-
-userPins.splice(
-0,
-userPins.length
-);
-
-savePins();
-
-renderPins();
-
-status(
-"All pins cleared"
-);
-
-}
-
-};
-
-$("refugeToggle").onchange=
-e=>
-toggleLayer(
-refugeLayer,
-e.target.checked,
-loadFwsRefuges
-);
-
-$("forestToggle").onchange=
-e=>
-toggleLayer(
-forestLayer,
-e.target.checked,
-loadForests
-);
-
-$("osmLandToggle").onchange=
-e=>
-toggleLayer(
-osmLandLayer,
-e.target.checked,
-loadViewportData
-);
-
-$("trailToggle").onchange=
-e=>
-toggleLayer(
-trailLayer,
-e.target.checked,
-loadViewportData
-);
-
-$("boatToggle").onchange=
-e=>
-toggleLayer(
-boatLayer,
-e.target.checked,
-loadViewportData
-);
-
-$("deerToggle").onchange=
-e=>{
-
-if(
-e.target.checked
-){
-
-deerLayer.addTo(
-map
-);
-
-buildDeerOverlay();
-
-}else if(
-map.hasLayer(
-deerLayer
-)
-){
-
-map.removeLayer(
-deerLayer
-);
-
-}
-
-};
-
-function toggleLayer(
-layer,
-on,
-loader
-){
-
-if(on){
-
-layer.addTo(
-map
-);
-
-loader?.();
-
-}else if(
-map.hasLayer(
-layer
-)
-){
-
-map.removeLayer(
-layer
-);
-
-}
-
-}
-
-$("locateBtn").onclick=
-()=>{
-
-status(
-"Finding your location..."
-);
-
-map.locate({
-
-setView:true,
-
-maxZoom:14,
-
-enableHighAccuracy:true
-
-});
-
-};
-
-map.on(
-"locationfound",
-e=>{
-
-L.circleMarker(
-e.latlng,
-{
-
-radius:7,
-
-color:"#fff",
-
-weight:2,
-
-fillColor:"#54a7ff",
-
-fillOpacity:1
-
-}
-)
-.addTo(map)
-.bindPopup(
-"Your location"
-);
-
-status(
-"Location found"
-);
-
-}
-);
-
-map.on(
-"locationerror",
-()=>{
-
-status(
-"Location permission is off or unavailable"
-);
-
-}
-);
-
-const FWS_URL=
-"https://services.arcgis.com/QVENGdaPbd4LUkLV/arcgis/rest/services/National_Wildlife_Refuge_System_Boundaries/FeatureServer/0/query";
-
-const USFS_URL=
-"https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ForestCommonNames_01/MapServer/2/query";
-
-async function arcgisGeojson(
-url,
-bbox
-){
-
-const p=
-new URLSearchParams({
-
-where:
-"1=1",
-
-outFields:
-"*",
-
-f:
-"geojson",
-
-outSR:
-"4326",
-
-returnGeometry:
-"true",
-
-geometry:
-`${bbox.getWest()},${bbox.getSouth()},${bbox.getEast()},${bbox.getNorth()}`,
-
-geometryType:
-"esriGeometryEnvelope",
-
-inSR:
-"4326",
-
-spatialRel:
-"esriSpatialRelIntersects"
-
-});
-
-const r=
-await fetch(
-url+
-"?"+
-p.toString()
-);
-
-if(!r.ok)
-throw new Error(
-"Boundary service error"
-);
-
-return r.json();
-
-}
-
-let fwsLoadedKey=
-"";
-
-let forestLoadedKey=
-"";
-
-function viewportKey(){
-
-const b=
-map.getBounds();
-
-return[
-
-b.getSouth().toFixed(1),
-
-b.getWest().toFixed(1),
-
-b.getNorth().toFixed(1),
-
-b.getEast().toFixed(1)
-
-].join(",");
-
-}
-
-async function loadFwsRefuges(){
-
-if(
-!$("refugeToggle").checked
-)
-return;
-
-const b=
-map.getBounds();
-
-const key=
-viewportKey();
-
-if(
-key===
-fwsLoadedKey
-)
-return;
-
-try{
-
-const data=
-await arcgisGeojson(
-FWS_URL,
-b
-);
-
-refugeLayer
-.clearLayers()
-.addData(
-data
-);
-
-fwsLoadedKey=
-key;
-
-rebuildSearchAndList();
-
-}catch(err){
-
-console.warn(
-err
-);
-
-status(
-"Refuge boundaries could not load right now"
-);
-
-}
-
-}
-
-async function loadForests(){
-
-if(
-!$("forestToggle").checked
-)
-return;
-
-const b=
-map.getBounds();
-
-const key=
-viewportKey();
-
-if(
-key===
-forestLoadedKey
-)
-return;
-
-try{
-
-const data=
-await arcgisGeojson(
-USFS_URL,
-b
-);
-
-forestLayer
-.clearLayers()
-.addData(
-data
-);
-
-forestLoadedKey=
-key;
-
-rebuildSearchAndList();
-
-}catch(err){
-
-console.warn(
-err
-);
-
-status(
-"National Forest boundaries could not load right now"
-);
-
-}
-
-}
-
-function overpassBBox(){
-
-const b=
-map.getBounds();
-
-return `${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()}`;
-
-}
-
-function osmToGeoJSON(
-elements
-){
-
-const features=
-[];
-
-for(
-const e of elements
-){
-
-const tags=
-e.tags||{};
-
-if(
-e.type==="node"
-&&
-(
-tags.leisure==="slipway"
-||
-tags.waterway==="slipway"
-)
-){
-
-features.push({
-
-type:
-"Feature",
-
-properties:{
-...tags,
-_kind:"boat"
-},
-
-geometry:{
-
-type:
-"Point",
-
-coordinates:[
-e.lon,
-e.lat
-]
-
-}
-
-});
-
-}
-
-if(
-e.type==="way"
-&&
-e.geometry?.length
-){
-
-const coords=
-e.geometry.map(
-g=>[
-g.lon,
-g.lat
-]
-);
-
-const isArea=
-(
-tags.boundary==="protected_area"
-||
-tags.boundary==="national_park"
-||
-tags.leisure==="nature_reserve"
-||
-tags.protect_class
-);
-
-const isTrail=
-[
-"path",
-"track",
-"footway",
-"bridleway",
-"cycleway"
-].includes(
-tags.highway
-);
-
-const isBoat=
-(
-tags.leisure==="slipway"
-||
-tags.waterway==="slipway"
-);
-
-if(
-isArea
-&&
-coords.length>3
-){
-
-const closed=
-coords[0][0]===
-coords.at(-1)[0]
-&&
-coords[0][1]===
-coords.at(-1)[1];
-
-const ring=
-closed
-?coords
-:[
-...coords,
-coords[0]
-];
-
-features.push({
-
-type:
-"Feature",
-
-properties:{
-...tags,
-_kind:"land"
-},
-
-geometry:{
-
-type:
-"Polygon",
-
-coordinates:[
-ring
-]
-
-}
-
-});
-
-}else if(
-isTrail
-){
-
-features.push({
-
-type:
-"Feature",
-
-properties:{
-...tags,
-_kind:"trail"
-},
-
-geometry:{
-
-type:
-"LineString",
-
-coordinates:
-coords
-
-}
-
-});
-
-}else if(
-isBoat
-){
-
-const c=
-coords[
-Math.floor(
-coords.length/2
-)
-];
-
-features.push({
-
-type:
-"Feature",
-
-properties:{
-...tags,
-_kind:"boat"
-},
-
-geometry:{
-
-type:
-"Point",
-
-coordinates:
-c
-
-}
-
-});
-
-}
-
-}
-
-}
-
-return{
-
-type:
-"FeatureCollection",
-
-features:
-features
-
-};
-
-}
-
-let overpassBusy=
-false;
-
-let lastOverpassKey=
-"";
-
-async function loadViewportData(
-force=false
-){
-
-if(
-map.getZoom()<10
-){
-
-osmLandLayer.clearLayers();
-
-trailLayer.clearLayers();
-
-boatLayer.clearLayers();
-
-if(
-$("trailToggle").checked
-||
-$("boatToggle").checked
-||
-$("osmLandToggle").checked
-){
-
-status(
-"Zoom in to level 10+ to load trails, ramps and local public land",
-1800
-);
-
-}
-
-rebuildSearchAndList();
-
-return;
-
-}
-
-const key=
-viewportKey();
-
-if(
-!force
-&&
-key===
-lastOverpassKey
-)
-return;
-
-if(
-overpassBusy
-)
-return;
-
-overpassBusy=
-true;
-
-const bb=
-overpassBBox();
-
-const q=
-`[out:json][timeout:20];
-(
-way["boundary"="protected_area"](${bb});
-way["boundary"="national_park"](${bb});
-way["leisure"="nature_reserve"](${bb});
-way["protect_class"](${bb});
-way["highway"~"path|track|footway|bridleway|cycleway"](${bb});
-node["leisure"="slipway"](${bb});
-way["leisure"="slipway"](${bb});
-node["waterway"="slipway"](${bb});
-way["waterway"="slipway"](${bb});
-);
-out tags geom;`;
-
-try{
-
-const r=
-await fetch(
-"https://overpass-api.de/api/interpreter",
-{
-
-method:
-"POST",
-
-headers:{
-"Content-Type":
-"text/plain"
-},
-
-body:
-q
-
-}
-);
-
-if(!r.ok)
-throw new Error(
-"Overpass unavailable"
-);
-
-const raw=
-await r.json();
-
-const gj=
-osmToGeoJSON(
-raw.elements||[]
-);
-
-const land={
-
-type:
-"FeatureCollection",
-
-features:
-gj.features.filter(
-f=>
-f.properties._kind===
-"land"
-)
-
-};
-
-const trails={
-
-type:
-"FeatureCollection",
-
-features:
-gj.features.filter(
-f=>
-f.properties._kind===
-"trail"
-)
-
-};
-
-const boats={
-
-type:
-"FeatureCollection",
-
-features:
-gj.features.filter(
-f=>
-f.properties._kind===
-"boat"
-)
-
-};
-
-osmLandLayer.clearLayers();
-
-trailLayer.clearLayers();
-
-boatLayer.clearLayers();
-
-if(
-$("osmLandToggle").checked
-)
-osmLandLayer.addData(
-land
-);
-
-if(
-$("trailToggle").checked
-)
-trailLayer.addData(
-trails
-);
-
-if(
-$("boatToggle").checked
-)
-boatLayer.addData(
-boats
-);
-
-lastOverpassKey=
-key;
-
-rebuildSearchAndList();
-
-if(
-$("deerToggle").checked
-)
-buildDeerOverlay();
-
-}catch(err){
-
-console.warn(
-err
-);
-
-status(
-"Trail / ramp service is busy. Move the map or tap Refresh later."
-);
-
-}finally{
-
-overpassBusy=
-false;
-
-}
-
-}
-
-function buildDeerOverlay(){
-
-deerLayer.clearLayers();
-
-if(
-!$("deerToggle").checked
-)
-return;
-
-const candidates=
-[];
-
-osmLandLayer.eachLayer(
-l=>{
-
-if(
-l.getBounds
-)
-candidates.push(
-l.getBounds().getCenter()
-);
-
-}
-);
-
-trailLayer.eachLayer(
-l=>{
-
-try{
-
-const ll=
-l.getBounds().getCenter();
-
-candidates.push(
-ll
-);
-
-}catch{}
-
-}
-);
-
-const center=
-map.getCenter();
-
-if(
-!candidates.length
-)
-candidates.push(
-center
-);
-
-const max=
-Math.min(
-candidates.length,
-35
-);
-
-for(
-let i=0;
-i<max;
-i++
-){
-
-const c=
-candidates[i];
-
-L.circle(
-c,
-{
-
-radius:
-180+
-(
-(i%4)*90
-),
-
-color:
-"#b84cff",
-
-weight:
-1,
-
-fillColor:
-"#b84cff",
-
-fillOpacity:
-.12,
-
-opacity:
-.45
-
-}
-)
-.bindPopup(
-`<div class="popup-card">
-<h3>Scouting Probability Area</h3>
-<p>Purple areas are scouting aids based on mapped habitat edges and access features. They are not guaranteed deer sightings.</p>
-</div>`
-)
-.addTo(
-deerLayer
-);
-
-}
-
-}
-
-function stateGuess(
-lat,
-lng
-){
-
-if(
-lat>28.8
-&&
-lat<33.1
-&&
-lng>-94.1
-&&
-lng<-88.7
-)
-return "LA";
-
-if(
-lat>30.1
-&&
-lat<35.1
-&&
-lng>-91.8
-&&
-lng<-88.0
-)
-return "MS";
-
-if(
-lat>30.0
-&&
-lat<35.1
-&&
-lng>-88.6
-&&
-lng<-84.8
-)
-return "AL";
-
-if(
-lat>33.0
-&&
-lat<36.6
-&&
-lng>-94.7
-&&
-lng<-89.6
-)
-return "AR";
-
-if(
-lat>25.8
-&&
-lat<36.6
-&&
-lng>-106.7
-&&
-lng<-93.4
-)
-return "TX";
-
-if(
-lat>24.2
-&&
-lat<31.1
-&&
-lng>-87.7
-&&
-lng<-80.0
-)
-return "FL";
-
-if(
-lat>30.3
-&&
-lat<35.1
-&&
-lng>-85.7
-&&
-lng<-80.8
-)
-return "GA";
-
-if(
-lat>34.9
-&&
-lat<36.8
-&&
-lng>-90.4
-&&
-lng<-81.6
-)
-return "TN";
-
-return "";
-
-}
-
-function layerItem(
-l,
-type
-){
-
-if(
-!l.feature
-)
-return null;
-
-let center;
-
-try{
-
-center=
-l.getBounds
-?
-l.getBounds().getCenter()
-:
-l.getLatLng();
-
-}catch{
-
-return null;
-
-}
-
-const p=
-l.feature.properties||{};
-
-return{
-
-name:
-propName(p),
-
-type:
-type,
-
-lat:
-center.lat,
-
-lng:
-center.lng,
-
-state:
-stateGuess(
-center.lat,
-center.lng
-),
-
-layer:
-l
-
-};
-
-}
-
-function rebuildSearchAndList(){
-
-visiblePublicLands=
-[];
-
-refugeLayer.eachLayer(
-l=>{
-
-const x=
-layerItem(
-l,
-"Wildlife Refuge"
-);
-
-if(x)
-visiblePublicLands.push(
-x
-);
-
-}
-);
-
-forestLayer.eachLayer(
-l=>{
-
-const x=
-layerItem(
-l,
-"National Forest"
-);
-
-if(x)
-visiblePublicLands.push(
-x
-);
-
-}
-);
-
-osmLandLayer.eachLayer(
-l=>{
-
-const x=
-layerItem(
-l,
-"Public / Protected Land"
-);
-
-if(x)
-visiblePublicLands.push(
-x
-);
-
-}
-);
-
-const seen=
-new Set();
-
-visiblePublicLands=
-visiblePublicLands
-.filter(
-x=>{
-
-const k=
-(
-x.name+
-"|"+
-x.type
-).toLowerCase();
-
-if(
-seen.has(k)
-)
-return false;
-
-seen.add(k);
-
-return true;
-
-}
-)
-.sort(
-(a,b)=>
-a.name.localeCompare(
-b.name
-)
-);
-
-searchIndex=[
-...visiblePublicLands
-];
-
-trailLayer.eachLayer(
-l=>{
-
-const x=
-layerItem(
-l,
-"Trail"
-);
-
-if(x)
-searchIndex.push(
-x
-);
-
-}
-);
-
-boatLayer.eachLayer(
-l=>{
-
-const x=
-layerItem(
-l,
-"Boat Launch"
-);
-
-if(x)
-searchIndex.push(
-x
-);
-
-}
-);
-
-renderLandList();
-
-}
-
-function renderLandList(){
-
-const state=
-$("stateFilter").value;
-
-const arr=
-visiblePublicLands.filter(
-x=>
-state==="ALL"
-||
-x.state===state
-);
-
-$("publicLandList").innerHTML=
-arr.length
-?
-arr.slice(
-0,
-250
-).map(
-x=>
-`<div class="landrow">
-<button
-data-lat="${x.lat}"
-data-lng="${x.lng}"
-data-name="${escapeHtml(x.name)}"
->
-<strong>${escapeHtml(x.name)}</strong>
-<small>${escapeHtml(x.type)}${x.state?" · "+x.state:""}</small>
-</button>
-</div>`
-).join("")
-:
-`<div class="landrow">
-<small>Move or zoom the map, then tap Refresh list.</small>
-</div>`;
-
-$("publicLandList")
-.querySelectorAll(
-"button"
-)
-.forEach(
-b=>
-b.onclick=
-()=>{
-
-map.setView(
-[
-+b.dataset.lat,
-+b.dataset.lng
-],
-13
-);
-
-$("drawer").classList.remove(
-"open"
-);
-
-}
-);
-
-}
-
-$("stateFilter").onchange=
-renderLandList;
-
-$("refreshLand").onclick=
-()=>{
-
-lastOverpassKey=
-"";
-
-fwsLoadedKey=
-"";
-
-forestLoadedKey=
-"";
-
-loadAll(
-true
-);
-
-};
-
-$("search").addEventListener(
-"input",
-()=>{
-
-const q=
-$("search")
-.value
-.trim()
-.toLowerCase();
-
-if(!q){
-
-$("searchResults").style.display=
-"none";
-
-return;
-
-}
-
-const arr=
-searchIndex.filter(
-x=>
-x.name.toLowerCase().includes(
-q
-)
-||
-x.type.toLowerCase().includes(
-q
-)
-).slice(
-0,
-30
-);
-
-$("searchResults").innerHTML=
-arr.length
-?
-arr.map(
-x=>
-`<div
-class="result"
-data-lat="${x.lat}"
-data-lng="${x.lng}"
->
-<strong>${escapeHtml(x.name)}</strong>
-<small>${escapeHtml(x.type)}${x.state?" · "+x.state:""}</small>
-</div>`
-).join("")
-:
-`<div class="result">
-<small>No match in the current loaded map area. Move to the state or area and refresh.</small>
-</div>`;
-
-$("searchResults").style.display=
-"block";
-
-$("searchResults")
-.querySelectorAll(
-"[data-lat]"
-)
-.forEach(
-r=>
-r.onclick=
-()=>{
-
-map.setView(
-[
-+r.dataset.lat,
-+r.dataset.lng
-],
-13
-);
-
-$("searchResults").style.display=
-"none";
-
-$("search").blur();
-
-}
-);
-
-}
-);
-
-document.addEventListener(
-"click",
-e=>{
-
-if(
-!$("searchWrap").contains(
-e.target
-)
-)
-$("searchResults").style.display=
-"none";
-
-}
-);
-
-let moveTimer;
-
-map.on(
-"moveend",
-()=>{
-
-clearTimeout(
-moveTimer
-);
-
-moveTimer=
-setTimeout(
-()=>loadAll(false),
-350
-);
-
-}
-);
-
-map.on(
-"zoomend",
-()=>{
-
-clearTimeout(
-moveTimer
-);
-
-moveTimer=
-setTimeout(
-()=>loadAll(false),
-350
-);
-
-}
-);
-
-async function loadAll(
-force=false
-){
-
-if(force){
-
-fwsLoadedKey=
-"";
-
-forestLoadedKey=
-"";
-
-lastOverpassKey=
-"";
-
-}
-
-await Promise.allSettled(
-[
-loadFwsRefuges(),
-loadForests()
-]
-);
-
-await loadViewportData(
-force
-);
-
-rebuildSearchAndList();
-
-}
-
-const legend=
-L.control({
-position:"bottomleft"
-});
-
-legend.onAdd=
-()=>{
-
-const d=
-L.DomUtil.create(
-"div",
-"legend"
-);
-
-d.innerHTML=
-`<div>
-<span class="line" style="background:#54a7ff"></span>
-Refuge
-</div>
-
-<div>
-<span class="line" style="background:#55c96f"></span>
-National Forest
-</div>
-
-<div>
-<span class="line" style="background:#ff9f43"></span>
-Public / Protected
-</div>
-
-<div>
-<span class="line" style="background:#ffd15c"></span>
-Trail
-</div>
-
-<div>
-<span class="dot" style="background:#b84cff"></span>
-Scouting probability
-</div>`;
-
-return d;
-
-};
-
-legend.addTo(
-map
-);
-
-const curated=[
-
-{
-name:
-"Richard K. Yancey Wildlife Management Area",
-
-type:
-"WMA",
-
-lat:
-31.04,
-
-lng:
--91.73,
-
-state:
-"LA",
-
-url:
-"https://www.wlf.louisiana.gov/page/richard-k-yancey"
-},
-
-{
-name:
-"Panther Swamp National Wildlife Refuge",
-
-type:
-"National Wildlife Refuge",
-
-lat:
-32.76,
-
-lng:
--90.76,
-
-state:
-"MS",
-
-url:
-"https://www.fws.gov/refuge/panther-swamp"
-},
-
-{
-name:
-"Theodore Roosevelt National Wildlife Refuge",
-
-type:
-"National Wildlife Refuge",
-
-lat:
-33.12,
-
-lng:
--90.78,
-
-state:
-"MS",
-
-url:
-"https://www.fws.gov/refuge/theodore-roosevelt"
-},
-
-{
-name:
-"Homochitto National Forest",
-
-type:
-"National Forest",
-
-lat:
-31.39,
-
-lng:
--91.16,
-
-state:
-"MS",
-
-url:
-"https://www.fs.usda.gov/"
-},
-
-{
-name:
-"De Soto National Forest",
-
-type:
-"National Forest",
-
-lat:
-31.00,
-
-lng:
--89.09,
-
-state:
-"MS",
-
-url:
-"https://www.fs.usda.gov/"
-},
-
-{
-name:
-"Delta National Forest",
-
-type:
-"National Forest",
-
-lat:
-32.80,
-
-lng:
--90.90,
-
-state:
-"MS",
-
-url:
-"https://www.fs.usda.gov/"
-},
-
-{
-name:
-"Kisatchie National Forest",
-
-type:
-"National Forest",
-
-lat:
-31.37,
-
-lng:
--92.65,
-
-state:
-"LA",
-
-url:
-"https://www.fs.usda.gov/"
-}
-
-];
-
-function addCurated(){
-
-curated.forEach(
-x=>{
-
-const m=
-L.circleMarker(
-[
-x.lat,
-x.lng
-],
-{
-
-radius:
-6,
-
-color:
-"#fff",
-
-weight:
-2,
-
-fillColor:
-"#ff9f43",
-
-fillOpacity:
-.9
-
-}
-).addTo(
-osmLandLayer
-);
-
-m.feature={
-
-type:
-"Feature",
-
-properties:{
-name:x.name
-}
-
-};
-
-m.bindPopup(
-`<div class="popup-card">
-
-<h3>${escapeHtml(x.name)}</h3>
-
-<p>
-<b>${escapeHtml(x.type)}</b>
-</p>
-
-<div class="popup-actions">
-
-<a
-href="${x.url}"
-target="_blank"
-rel="noopener"
->
-Regulations
-</a>
-
-<button
-onclick="map.setView([${x.lat},${x.lng}],13)"
->
-Zoom
-</button>
-
-</div>
-
-</div>`
-);
-
-}
-);
-
-}
-
-addCurated();
-
-loadAll(
-true
-);
-
 </script>
 
 </body>
