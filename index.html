@@ -4,69 +4,362 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#173b25">
-<title>HuntLand — LA/MS Hunt Planner</title>
+<title>HuntLand</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js"></script>
 
 <style>
-:root{--g:#173b25;--g2:#245a37;--cream:#f6f5ee;--ink:#172019;--muted:#6b726b;--line:#dfe3dc;--soft:#eef3ed;--amber:#fff0c7;--red:#8c2b2b}
+:root{
+--green:#173b25;
+--green2:#245a37;
+--white:#fff;
+--line:#dfe3dc;
+--muted:#687169;
+--soft:#eef3ed;
+--warn:#fff0c7;
+--red:#8c2b2b;
+}
+
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#e7ebe6}
+
+html,body,#app{
+margin:0;
+width:100%;
+height:100%;
+overflow:hidden;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
 button,input,select,textarea{font:inherit}
-#app{height:100%;max-width:900px;margin:auto;background:white;position:relative;overflow:hidden}
-header{position:absolute;top:0;left:0;right:0;z-index:1100;background:rgba(23,59,37,.95);color:#fff;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{font-size:22px;font-weight:900}
-.tag{font-size:11px;opacity:.82}
-.statusDot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#9ad1a8;margin-right:5px}
-.live{font-size:11px;white-space:nowrap}
-.toptools{position:absolute;top:calc(54px + env(safe-area-inset-top));left:6px;right:6px;z-index:1050;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:12px;display:flex;gap:6px;overflow-x:auto;padding:6px;box-shadow:0 2px 8px #0002}
-.toptools button,.toptools select{border:1px solid var(--line);background:#fff;border-radius:11px;padding:8px 10px;white-space:nowrap;font-weight:750}
-.toptools button.on{background:var(--g);color:#fff;border-color:var(--g)}
-#map{position:absolute;inset:0;z-index:1}
-.leaflet-control-layers{font-size:13px}
-.leaflet-popup-content{margin:11px 13px;min-width:190px}
-.leaflet-popup-content-wrapper{border-radius:13px}
-.sheet{position:absolute;left:0;right:0;bottom:0;height:112px;background:#fff;border-top:1px solid var(--line);border-radius:18px 18px 0 0;overflow:hidden;padding:7px 10px calc(10px + env(safe-area-inset-bottom));z-index:1200;box-shadow:0 -3px 16px #0003;transition:height .2s ease}
-.sheet.open{height:58vh;overflow:auto}
-.grab{width:44px;height:4px;border-radius:5px;background:#c7ccc7;margin:0 auto 8px;cursor:pointer}
-.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:9px}
-.tabs button{border:0;background:#edf0eb;border-radius:18px;padding:8px 11px;font-weight:750;white-space:nowrap}
-.tabs button.on{background:var(--g);color:#fff}
+
+#map{
+position:absolute;
+inset:0;
+z-index:1;
+}
+
+header{
+position:absolute;
+top:0;
+left:0;
+right:0;
+z-index:1100;
+background:rgba(23,59,37,.95);
+color:white;
+padding:calc(8px + env(safe-area-inset-top)) 12px 8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.brand{
+font-size:22px;
+font-weight:900;
+}
+
+.tag{
+font-size:11px;
+opacity:.8;
+}
+
+.live{
+font-size:11px;
+}
+
+.toptools{
+position:absolute;
+top:calc(55px + env(safe-area-inset-top));
+left:7px;
+right:7px;
+z-index:1050;
+display:flex;
+gap:6px;
+overflow-x:auto;
+padding:6px;
+border-radius:13px;
+background:rgba(255,255,255,.94);
+box-shadow:0 2px 9px #0003;
+}
+
+.toptools button{
+white-space:nowrap;
+border:1px solid var(--line);
+border-radius:10px;
+padding:8px 10px;
+background:white;
+font-weight:800;
+}
+
+.toptools button.on{
+background:var(--green);
+color:white;
+}
+
+.fabs{
+position:absolute;
+right:10px;
+top:calc(110px + env(safe-area-inset-top));
+z-index:1000;
+display:grid;
+gap:8px;
+}
+
+.fab{
+width:48px;
+height:48px;
+border:0;
+border-radius:50%;
+background:white;
+font-size:20px;
+box-shadow:0 2px 9px #0005;
+}
+
+.fab.on{
+background:var(--green);
+color:white;
+}
+
+.drawer{
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+height:108px;
+z-index:1200;
+background:white;
+border-radius:20px 20px 0 0;
+box-shadow:0 -4px 18px #0004;
+transition:height .22s ease;
+overflow:hidden;
+padding-bottom:env(safe-area-inset-bottom);
+}
+
+.drawer.open{
+height:58vh;
+}
+
+.drawerHandle{
+height:54px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+touch-action:manipulation;
+user-select:none;
+}
+
+.grab{
+width:48px;
+height:5px;
+border-radius:5px;
+background:#bcc3bc;
+margin-bottom:7px;
+}
+
+.handleText{
+font-size:13px;
+font-weight:900;
+color:var(--green);
+}
+
+.tabs{
+display:flex;
+gap:6px;
+overflow-x:auto;
+padding:0 10px 8px;
+}
+
+.tabs button{
+border:0;
+border-radius:18px;
+background:#edf0eb;
+padding:8px 11px;
+font-weight:800;
+white-space:nowrap;
+}
+
+.tabs button.on{
+background:var(--green);
+color:white;
+}
+
+.drawerBody{
+height:calc(58vh - 94px);
+overflow:auto;
+padding:0 10px 25px;
+-webkit-overflow-scrolling:touch;
+}
+
 .panel{display:none}
 .panel.on{display:block}
-.h{font-size:18px;font-weight:900;margin:8px 0}
-.sub{font-size:12px;color:var(--muted);line-height:1.4}
-.card{border:1px solid var(--line);border-radius:14px;padding:11px;margin:8px 0;background:#fff}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+.h{
+font-size:19px;
+font-weight:900;
+margin:8px 0;
+}
+
+.sub{
+font-size:12px;
+color:var(--muted);
+line-height:1.45;
+}
+
+.card{
+border:1px solid var(--line);
+border-radius:14px;
+padding:11px;
+margin:8px 0;
+background:white;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
 .name{font-weight:900}
-.small{font-size:11px;color:var(--muted)}
-.badge{display:inline-block;background:var(--soft);border-radius:8px;padding:5px 7px;font-size:11px;margin:5px 4px 0 0}
-.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.btn{border:0;border-radius:10px;padding:9px 10px;font-weight:800}
-.primary{background:var(--g);color:#fff}
-.secondary{background:#fff;color:var(--g);border:1px solid var(--g)}
-.danger{background:#f6e8e8;color:var(--red)}
+
+.small{
+font-size:11px;
+color:var(--muted);
+}
+
+.badge{
+display:inline-block;
+background:var(--soft);
+border-radius:8px;
+padding:5px 7px;
+font-size:11px;
+margin:5px 4px 0 0;
+}
+
+.btnrow{
+display:flex;
+gap:7px;
+flex-wrap:wrap;
+margin-top:8px;
+}
+
+.btn{
+border:0;
+border-radius:10px;
+padding:9px 10px;
+font-weight:800;
+}
+
+.primary{
+background:var(--green);
+color:white;
+}
+
+.secondary{
+background:white;
+color:var(--green);
+border:1px solid var(--green);
+}
+
+.danger{
+background:#f6e8e8;
+color:var(--red);
+}
+
 .wide{width:100%}
+
 .field{margin:8px 0}
-.field label{display:block;font-size:12px;font-weight:800;margin-bottom:4px}
-.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}
-.field textarea{min-height:72px;resize:vertical}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.notice{background:var(--amber);border-radius:11px;padding:9px;font-size:11px;line-height:1.4}
-.oknotice{background:#eaf4eb;border-radius:11px;padding:9px;font-size:11px;line-height:1.4}
-.metric{font-size:22px;font-weight:900;color:var(--g)}
-.iconMarker{font-size:25px;line-height:28px;text-align:center;filter:drop-shadow(0 2px 2px #0005)}
-.userMarker{width:18px;height:18px;background:#1987ff;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 8px #1987ff25}
-.areaMarker{font-size:22px;filter:drop-shadow(0 2px 2px #0005)}
-.fabstack{position:absolute;right:10px;top:calc(105px + env(safe-area-inset-top));z-index:1000;display:grid;gap:7px}
-.fab{width:46px;height:46px;border-radius:50%;border:0;background:#fff;box-shadow:0 2px 8px #0004;font-size:20px}
-.fab.on{background:var(--g);color:#fff}
-.toast{position:absolute;z-index:2000;left:50%;bottom:128px;transform:translateX(-50%);background:#182019;color:#fff;border-radius:10px;padding:9px 12px;font-size:12px;max-width:84%;display:none;box-shadow:0 3px 12px #0005}
-.sourceLink{display:inline-block;margin-top:6px;color:var(--g);font-weight:800;text-decoration:none}
-.empty{text-align:center;padding:18px;color:var(--muted)}
-@media(min-width:700px){.sheet.open{height:52vh}.fabstack{right:14px}}
+
+.field label{
+display:block;
+font-size:12px;
+font-weight:800;
+margin-bottom:4px;
+}
+
+.field input,
+.field select,
+.field textarea{
+width:100%;
+border:1px solid var(--line);
+border-radius:10px;
+padding:10px;
+background:white;
+}
+
+.field textarea{
+min-height:70px;
+}
+
+.grid2{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+}
+
+.notice{
+background:var(--warn);
+border-radius:11px;
+padding:9px;
+font-size:11px;
+line-height:1.4;
+}
+
+.iconMarker{
+font-size:25px;
+text-align:center;
+filter:drop-shadow(0 2px 2px #0006);
+}
+
+.areaMarker{
+font-size:23px;
+filter:drop-shadow(0 2px 2px #0005);
+}
+
+.userMarker{
+width:18px;
+height:18px;
+background:#1688ff;
+border:3px solid white;
+border-radius:50%;
+box-shadow:0 0 0 8px #1688ff30;
+}
+
+.toast{
+position:absolute;
+z-index:2500;
+left:50%;
+bottom:120px;
+transform:translateX(-50%);
+background:#182019;
+color:white;
+padding:9px 12px;
+border-radius:10px;
+font-size:12px;
+max-width:85%;
+display:none;
+box-shadow:0 3px 12px #0005;
+}
+
+.source{
+display:inline-block;
+margin-top:7px;
+font-weight:800;
+color:var(--green);
+text-decoration:none;
+}
+
+.leaflet-control-zoom{
+margin-top:115px!important;
+}
+
+@media(min-width:700px){
+.drawer.open{height:52vh}
+.drawerBody{height:calc(52vh - 94px)}
+}
 </style>
 </head>
 
@@ -76,132 +369,141 @@ header{position:absolute;top:0;left:0;right:0;z-index:1100;background:rgba(23,59
 <header>
 <div>
 <div class="brand">🏹 HuntLand</div>
-<div class="tag">Louisiana + Mississippi hunt planner</div>
+<div class="tag">E-scout • plan • navigate</div>
 </div>
-<div class="live"><span class="statusDot"></span>Live map/GIS</div>
+<div class="live">● Live GIS</div>
 </header>
 
 <div class="toptools">
 <button class="on" data-base="road" onclick="setBase('road',this)">🗺 Road</button>
 <button data-base="sat" onclick="setBase('sat',this)">🛰 Satellite</button>
 <button data-base="topo" onclick="setBase('topo',this)">⛰ Topo</button>
-<button onclick="fitRegion()">LA + MS</button>
-<button onclick="locateMe(true)">📍 My location</button>
+<button onclick="locateMe(true)">📍 GPS</button>
 <button id="trackBtn" onclick="toggleTracking(this)">🧭 Track</button>
 </div>
 
 <div id="map"></div>
 
-<div class="fabstack">
-<button id="pinFab" class="fab" onclick="togglePinMode()" title="Add waypoint">➕</button>
-<button id="measureFab" class="fab" onclick="toggleMeasure()" title="Measure distance">📏</button>
-<button class="fab" onclick="clearMeasure()" title="Clear measurement">✖</button>
+<div class="fabs">
+<button id="pinFab" class="fab" onclick="togglePinMode()">➕</button>
+<button id="measureFab" class="fab" onclick="toggleMeasure()">📏</button>
+<button class="fab" onclick="clearMeasure()">✖</button>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<div class="sheet">
-<div class="grab" onclick="toggleSheet()"></div>
-<div class="small" style="text-align:center;font-weight:800" onclick="toggleSheet()">▲ HuntLand tools</div>
+<div id="drawer" class="drawer open">
+
+<div class="drawerHandle" onclick="toggleDrawer()">
+<div class="grab"></div>
+<div id="handleText" class="handleText">▼ Hide HuntLand tools</div>
+</div>
 
 <div class="tabs">
-<button class="on" onclick="tab('areas',this)">Public land</button>
-<button onclick="tab('pins',this)">Waypoints</button>
-<button onclick="tab('plan',this)">Plan hunt</button>
-<button onclick="tab('layers',this)">Layers</button>
-<button onclick="tab('rules',this)">Rules</button>
+<button class="on" onclick="openTab('areas',this)">Public Land</button>
+<button onclick="openTab('pins',this)">Waypoints</button>
+<button onclick="openTab('plan',this)">Scout</button>
+<button onclick="openTab('layers',this)">Layers</button>
+<button onclick="openTab('rules',this)">Rules</button>
 </div>
+
+<div class="drawerBody">
 
 <section id="areas" class="panel on">
 <div class="row">
 <div>
-<div class="h">Public land</div>
-<div class="sub">Tap an area to zoom there. Official boundaries are on by default.</div>
+<div class="h">Public Land</div>
+<div class="sub">Official boundaries are turned on automatically.</div>
 </div>
+
 <select id="stateFilter" onchange="renderAreas()">
-<option value="all">All</option>
+<option value="all">LA + MS</option>
 <option value="LA">Louisiana</option>
 <option value="MS">Mississippi</option>
 </select>
 </div>
+
 <div id="areaList"></div>
 </section>
 
 <section id="pins" class="panel">
-<div class="h">Saved waypoints</div>
-<div class="sub">Tap ➕ and then tap the map, or paste coordinates. Save camp, truck, boat ramp, stand, camera, rub, scrape, feed and scouting pins.</div>
+
+<div class="h">Waypoints</div>
+
+<div class="sub">
+Drop a pin with ➕ or paste coordinates from onX.
+</div>
 
 <div class="card">
+
 <div class="field">
 <label>Paste coordinates</label>
 <input id="coordInput" placeholder="31.12345, -91.54321">
 </div>
 
 <div class="grid2">
+
 <div class="field">
-<label>Type</label>
+<label>Pin type</label>
 <select id="coordType">
-<option value="camp">Camp</option>
-<option value="truck">Truck</option>
-<option value="boat">Boat / Ramp</option>
-<option value="stand">Stand</option>
-<option value="camera">Camera</option>
-<option value="rub">Rub</option>
-<option value="scrape">Scrape</option>
-<option value="feed">Feed</option>
-<option value="scout">Scout</option>
+<option value="camp">🏕 Camp</option>
+<option value="truck">🛻 Truck</option>
+<option value="boat">🚤 Boat / Ramp</option>
+<option value="stand">🌲 Stand</option>
+<option value="camera">📷 Camera</option>
+<option value="rub">🦌 Rub</option>
+<option value="scrape">🦌 Scrape</option>
+<option value="feed">🌰 Feed</option>
+<option value="scout">📌 Scout</option>
 </select>
 </div>
 
 <div class="field">
 <label>Name</label>
-<input id="coordName" placeholder="Camp, North stand, etc.">
+<input id="coordName" placeholder="North stand">
 </div>
+
 </div>
 
 <div class="btnrow">
-<button class="btn primary" onclick="goToCoordinates(false)">Go to coordinates</button>
-<button class="btn secondary" onclick="goToCoordinates(true)">Save pin here</button>
+<button class="btn primary" onclick="goCoords(false)">Go</button>
+<button class="btn secondary" onclick="goCoords(true)">Save Pin</button>
 </div>
+
 </div>
 
 <div class="btnrow">
 <button class="btn secondary" onclick="exportGPX()">Export GPX</button>
 
-<label class="btn secondary" style="cursor:pointer">
+<label class="btn secondary">
 Import GPX
-<input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" style="display:none" onchange="importGPX(event)">
+<input type="file" accept=".gpx" style="display:none" onchange="importGPX(event)">
 </label>
 
-<button class="btn secondary" onclick="exportGeoJSON()">GeoJSON</button>
-
-<label class="btn secondary" style="cursor:pointer">
-Import JSON
-<input id="importFile" type="file" accept=".json,.geojson,application/geo+json,application/json" style="display:none" onchange="importGeoJSON(event)">
-</label>
-
-<button class="btn danger" onclick="clearAllPins()">Clear pins</button>
+<button class="btn danger" onclick="clearPins()">Clear Pins</button>
 </div>
 
 <div id="pinList"></div>
+
 </section>
 
 <section id="plan" class="panel">
-<div class="h">Plan hunt</div>
+
+<div class="h">Scout This Area</div>
 
 <div class="field">
-<label>Area</label>
+<label>Public land</label>
 <select id="planArea"></select>
 </div>
 
 <div class="grid2">
+
 <div class="field">
 <label>Species</label>
 <select id="species">
 <option>Deer</option>
 <option>Turkey</option>
 <option>Waterfowl</option>
-<option>Small game</option>
 </select>
 </div>
 
@@ -209,16 +511,18 @@ Import JSON
 <label>Access</label>
 <select id="access">
 <option>Walk-in</option>
-<option>Boat-in</option>
-<option>ATV-assisted</option>
 <option>E-bike</option>
+<option>ATV-assisted</option>
+<option>Boat-in</option>
 </select>
 </div>
+
 </div>
 
 <div class="grid2">
+
 <div class="field">
-<label>Hunt time</label>
+<label>Time</label>
 <select id="huntTime">
 <option>Morning</option>
 <option>Evening</option>
@@ -227,38 +531,42 @@ Import JSON
 </div>
 
 <div class="field">
-<label>Effort</label>
+<label>Pressure</label>
 <select id="effort">
-<option>Easy</option>
+<option>Easy access</option>
 <option selected>Moderate</option>
-<option>Deep</option>
+<option>Deep / low pressure</option>
 </select>
 </div>
+
 </div>
 
 <div class="field">
-<label>Notes / observations</label>
-<textarea id="huntNotes" placeholder="Oak mast, tracks, rub line, water level, access condition..."></textarea>
+<label>Notes</label>
+<textarea id="huntNotes" placeholder="Tracks, mast, water level, sign..."></textarea>
 </div>
 
-<button class="btn primary wide" onclick="buildPlan()">Build scouting plan</button>
+<button class="btn primary wide" onclick="buildScoutPlan()">🎯 Scout This Area</button>
+
 <div id="planResult"></div>
+
 </section>
 
 <section id="layers" class="panel">
-<div class="h">Live map layers</div>
+
+<div class="h">Map Layers</div>
 
 <div class="notice">
-Agency GIS services can occasionally be offline. Your saved waypoints and GPS still work independently.
+Live agency layers can occasionally be unavailable. Boundaries, trails and access rules should always be verified with the managing agency before hunting.
 </div>
 
 <div class="card">
 <div class="row">
 <div>
-<div class="name">Louisiana WMA/refuge boundaries</div>
-<div class="small">LDWF live boundaries</div>
+<div class="name">Louisiana public-land boundaries</div>
+<div class="small">LDWF WMA / refuge GIS</div>
 </div>
-<input type="checkbox" id="laBoundaryToggle" onchange="toggleOverlay('laBoundary',this.checked)">
+<input id="laBoundaryToggle" type="checkbox" checked onchange="toggleLayer('laBoundary',this.checked)">
 </div>
 </div>
 
@@ -266,9 +574,9 @@ Agency GIS services can occasionally be offline. Your saved waypoints and GPS st
 <div class="row">
 <div>
 <div class="name">Louisiana WMA trails</div>
-<div class="small">LDWF WMA/refuge trail data</div>
+<div class="small">LDWF trail GIS</div>
 </div>
-<input type="checkbox" id="laTrailsToggle" onchange="toggleOverlay('laTrails',this.checked)">
+<input type="checkbox" onchange="toggleLayer('laTrails',this.checked)">
 </div>
 </div>
 
@@ -276,9 +584,9 @@ Agency GIS services can occasionally be offline. Your saved waypoints and GPS st
 <div class="row">
 <div>
 <div class="name">Mississippi WMA boundaries</div>
-<div class="small">MDWFP property boundaries</div>
+<div class="small">MDWFP</div>
 </div>
-<input type="checkbox" id="msBoundaryToggle" onchange="toggleOverlay('msBoundary',this.checked)">
+<input id="msBoundaryToggle" type="checkbox" checked onchange="toggleLayer('msBoundary',this.checked)">
 </div>
 </div>
 
@@ -286,29 +594,29 @@ Agency GIS services can occasionally be offline. Your saved waypoints and GPS st
 <div class="row">
 <div>
 <div class="name">Mississippi roads & trails</div>
-<div class="small">MDWFP WMA Roads & Trails</div>
+<div class="small">MDWFP</div>
 </div>
-<input type="checkbox" id="msRoadsToggle" onchange="toggleOverlay('msRoads',this.checked)">
-</div>
-</div>
-
-<div class="card">
-<div class="row">
-<div>
-<div class="name">Mississippi WMA access points</div>
-<div class="small">Boat ramps, parking, gates, permit stations — MDWFP</div>
-</div>
-<input type="checkbox" id="msPointsToggle" onchange="toggleOverlay('msPoints',this.checked)">
+<input type="checkbox" onchange="toggleLayer('msRoads',this.checked)">
 </div>
 </div>
 
 <div class="card">
 <div class="row">
 <div>
-<div class="name">Mississippi boat launches</div>
-<div class="small">Statewide MDWFP Boat Ramps layer</div>
+<div class="name">MS access points</div>
+<div class="small">Parking, gates, ramps and other WMA access features</div>
 </div>
-<input type="checkbox" id="msBoatToggle" onchange="toggleOverlay('msBoat',this.checked)">
+<input type="checkbox" onchange="toggleLayer('msPoints',this.checked)">
+</div>
+</div>
+
+<div class="card">
+<div class="row">
+<div>
+<div class="name">Mississippi boat ramps</div>
+<div class="small">MDWFP</div>
+</div>
+<input type="checkbox" onchange="toggleLayer('msBoat',this.checked)">
 </div>
 </div>
 
@@ -316,9 +624,9 @@ Agency GIS services can occasionally be offline. Your saved waypoints and GPS st
 <div class="row">
 <div>
 <div class="name">Other mapped boat launches</div>
-<div class="small">OpenStreetMap slipways / launches in the current map view</div>
+<div class="small">Loads launches in the current map view</div>
 </div>
-<input type="checkbox" id="osmBoatToggle" onchange="toggleOSMBoatRamps(this.checked)">
+<input type="checkbox" onchange="toggleBoatLaunches(this.checked)">
 </div>
 </div>
 
@@ -328,175 +636,160 @@ Agency GIS services can occasionally be offline. Your saved waypoints and GPS st
 <div class="name">National Forest boundaries</div>
 <div class="small">U.S. Forest Service</div>
 </div>
-<input type="checkbox" id="usfsBoundaryToggle" onchange="toggleOverlay('usfsBoundary',this.checked)">
+<input id="usfsBoundaryToggle" type="checkbox" checked onchange="toggleLayer('usfsBoundary',this.checked)">
 </div>
 </div>
 
 <div class="card">
 <div class="row">
 <div>
-<div class="name">USFS motor-vehicle / e-bike routes</div>
-<div class="small">MVUM roads and trails — includes route and e-bike data where published</div>
+<div class="name">USFS roads / trails / e-bike</div>
+<div class="small">MVUM route data — verify route, class and seasonal status</div>
 </div>
-<input type="checkbox" id="usfsMvumToggle" onchange="toggleOverlay('usfsMvum',this.checked)">
+<input type="checkbox" onchange="toggleLayer('usfsMvum',this.checked)">
 </div>
 </div>
+
 </section>
 
 <section id="rules" class="panel">
-<div class="h">Current rules & sources</div>
+
+<div class="h">Current Rules</div>
 
 <div class="notice">
-<b>Important:</b> HuntLand does not freeze legal dates into the app. Use official sources before every hunt for current seasons, closures, permits, check-in rules and motorized/e-bike access.
+Season dates, closures, permits and motorized/e-bike access can change. These buttons open current official agency information instead of relying on old hard-coded regulations.
 </div>
 
 <div id="rulesList"></div>
+
 </section>
 
 </div>
 </div>
 
 <script>
-const AREA_DATA=[
-{id:'panther',name:'Panther Swamp NWR',state:'MS',agency:'USFWS',lat:32.79,lng:-90.70,tags:['Deer','Turkey','Waterfowl','Boat'],source:'https://www.fws.gov/refuge/theodore-roosevelt-complex-headquarters-panther-swamp/visit-us/activities/hunting',notes:'Bottomland hardwoods, sloughs and wet access. Verify current refuge permit, draw-hunt and ATV rules.'},
-{id:'yancey',name:'Richard K. Yancey WMA',state:'LA',agency:'LDWF',lat:31.20,lng:-91.75,tags:['Deer','Turkey','Water access'],source:'https://www.wlf.louisiana.gov/page/richard-k-yancey',notes:'Large bottomland WMA. Check current WMA schedule, self-clearing/check-in and flood/access conditions.'},
-{id:'kisatchie',name:'Kisatchie National Forest',state:'LA',agency:'USFS',lat:31.52,lng:-92.55,tags:['Deer','Turkey','National Forest'],source:'https://www.fs.usda.gov/r08/kisatchie',notes:'Large forest system. Use current Forest Service MVUM for legal motorized routes and seasonal designations.'},
-{id:'homochitto',name:'Homochitto National Forest',state:'MS',agency:'USFS',lat:31.43,lng:-90.95,tags:['Deer','Turkey','National Forest'],source:'https://www.fs.usda.gov/r08/mississippi',notes:'Pine/hardwood forest with large walk-in potential. Verify USFS closures/MVUM plus Mississippi hunting rules.'},
-{id:'delta',name:'Delta National Forest',state:'MS',agency:'USFS',lat:32.72,lng:-90.77,tags:['Deer','Turkey','Bottomland'],source:'https://www.fs.usda.gov/r08/mississippi',notes:'Bottomland National Forest. Confirm current roads, flood conditions, state rules and Forest Service closures.'},
-{id:'desoto',name:'De Soto National Forest',state:'MS',agency:'USFS',lat:31.15,lng:-89.05,tags:['Deer','Turkey','National Forest'],source:'https://www.fs.usda.gov/r08/mississippi',notes:'Extensive pine forest. Use official MVUM and Mississippi season regulations.'}
+
+const AREAS=[
+{id:'panther',name:'Panther Swamp NWR',state:'MS',agency:'USFWS',lat:32.79,lng:-90.70,source:'https://www.fws.gov/refuge/theodore-roosevelt-complex-headquarters-panther-swamp/visit-us/activities/hunting',note:'Bottomland hardwood, slough and wet-access country.'},
+{id:'yancey',name:'Richard K. Yancey WMA',state:'LA',agency:'LDWF',lat:31.20,lng:-91.75,source:'https://www.wlf.louisiana.gov/page/richard-k-yancey',note:'Large bottomland WMA with water and road-access considerations.'},
+{id:'kisatchie',name:'Kisatchie National Forest',state:'LA',agency:'USFS',lat:31.52,lng:-92.55,source:'https://www.fs.usda.gov/r08/kisatchie',note:'Large National Forest with extensive road and trail system.'},
+{id:'homochitto',name:'Homochitto National Forest',state:'MS',agency:'USFS',lat:31.43,lng:-90.95,source:'https://www.fs.usda.gov/r08/mississippi',note:'Pine/hardwood National Forest with large walk-in areas.'},
+{id:'delta',name:'Delta National Forest',state:'MS',agency:'USFS',lat:32.72,lng:-90.77,source:'https://www.fs.usda.gov/r08/mississippi',note:'Bottomland National Forest with flood/access considerations.'},
+{id:'desoto',name:'De Soto National Forest',state:'MS',agency:'USFS',lat:31.15,lng:-89.05,source:'https://www.fs.usda.gov/r08/mississippi',note:'Large pine-dominated National Forest.'}
 ];
 
-const OFFICIAL_SOURCES=[
-{name:'Louisiana hunting regulations',agency:'LDWF',url:'https://www.wlf.louisiana.gov/page/seasons-and-regulations'},
-{name:'Louisiana WMA information',agency:'LDWF',url:'https://www.wlf.louisiana.gov/page/wmas-refuges-and-conservation-areas'},
-{name:'Mississippi hunting regulations',agency:'MDWFP',url:'https://www.mdwfp.com/wildlife-hunting'},
-{name:'Mississippi WMA information',agency:'MDWFP',url:'https://www.mdwfp.com/wildlife-hunting/wmas'},
-{name:'Panther Swamp hunting',agency:'USFWS',url:'https://www.fws.gov/refuge/theodore-roosevelt-complex-headquarters-panther-swamp/visit-us/activities/hunting'},
-{name:'Kisatchie National Forest',agency:'USFS',url:'https://www.fs.usda.gov/r08/kisatchie'},
-{name:'National Forests in Mississippi',agency:'USFS',url:'https://www.fs.usda.gov/r08/mississippi'}
+const SOURCES=[
+['Louisiana seasons & regulations','LDWF','https://www.wlf.louisiana.gov/page/seasons-and-regulations'],
+['Louisiana WMAs & refuges','LDWF','https://www.wlf.louisiana.gov/page/wmas-refuges-and-conservation-areas'],
+['Mississippi hunting','MDWFP','https://www.mdwfp.com/wildlife-hunting'],
+['Mississippi WMAs','MDWFP','https://www.mdwfp.com/wildlife-hunting/wmas'],
+['Panther Swamp hunting','USFWS','https://www.fws.gov/refuge/theodore-roosevelt-complex-headquarters-panther-swamp/visit-us/activities/hunting'],
+['Kisatchie National Forest','USFS','https://www.fs.usda.gov/r08/kisatchie'],
+['National Forests in Mississippi','USFS','https://www.fs.usda.gov/r08/mississippi']
 ];
 
-const map=L.map('map',{zoomControl:true,preferCanvas:true}).setView([31.8,-91.0],7);
+const map=L.map('map',{
+zoomControl:true,
+preferCanvas:true
+}).setView([31.8,-91],7);
 
-const bases={
+const base={
 road:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19,
-attribution:'© OpenStreetMap contributors'
+attribution:'© OpenStreetMap'
 }),
 sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
 maxZoom:19,
-attribution:'Tiles © Esri'
+attribution:'© Esri'
 }),
 topo:L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{
 maxZoom:17,
-attribution:'© OpenStreetMap contributors, SRTM | OpenTopoMap'
+attribution:'© OpenTopoMap'
 })
 };
 
-let activeBase=bases.road.addTo(map);
+let currentBase=base.sat.addTo(map);
 
-L.control.scale({imperial:true,metric:false}).addTo(map);
+const layers={
 
-const overlays={
 laBoundary:L.esri.dynamicMapLayer({
 url:'https://gis.wlf.la.gov/arcgis/rest/services/Wildlife_Services/LDWF_WMA_Refuge/MapServer',
-opacity:.68,
-disableCache:true,
-attribution:'LDWF'
+opacity:.72
 }),
 
 laTrails:L.esri.dynamicMapLayer({
 url:'https://gis.wlf.la.gov/arcgis/rest/services/Wildlife_Services/WMATrails_White/MapServer',
-opacity:.9,
-disableCache:true,
-attribution:'LDWF'
+opacity:1
 }),
 
 msBoundary:L.esri.dynamicMapLayer({
 url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer',
 layers:[2],
-opacity:.68,
-disableCache:true,
-attribution:'MDWFP'
+opacity:.72
 }),
 
 msRoads:L.esri.dynamicMapLayer({
 url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer',
 layers:[5],
-opacity:.9,
-disableCache:true,
-attribution:'MDWFP'
+opacity:1
 }),
 
 msPoints:L.esri.dynamicMapLayer({
 url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_WMA_Data/MapServer',
 layers:[0],
-opacity:1,
-disableCache:true,
-attribution:'MDWFP'
+opacity:1
 }),
 
 msBoat:L.esri.dynamicMapLayer({
 url:'https://arcgis.mdwfp.com/arcgis/rest/services/Public/Public_Lakes/MapServer',
 layers:[5],
-opacity:1,
-disableCache:true,
-attribution:'MDWFP Boat Ramps'
+opacity:1
 }),
 
 usfsBoundary:L.esri.dynamicMapLayer({
 url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_ProclaimedForestBoundaries_01/MapServer',
 layers:[0],
-opacity:.55,
-disableCache:true,
-attribution:'USFS'
+opacity:.60
 }),
 
 usfsMvum:L.esri.dynamicMapLayer({
 url:'https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_MVUM_01/MapServer',
-opacity:.9,
-disableCache:true,
-attribution:'USFS MVUM'
+opacity:1
 })
+
 };
 
-Object.values(overlays).forEach(layer=>{
-layer.on('requesterror',()=>{
-toast('Agency map service did not respond. Try again later.');
-});
-});
+layers.laBoundary.addTo(map);
+layers.msBoundary.addTo(map);
+layers.usfsBoundary.addTo(map);
 
 const areaLayer=L.layerGroup().addTo(map);
 const waypointLayer=L.layerGroup().addTo(map);
 const measureLayer=L.layerGroup().addTo(map);
-const osmBoatLayer=L.layerGroup();
+const boatLayer=L.layerGroup();
 
-let osmBoatEnabled=false;
-let userMarker=null;
-let userAccuracy=null;
-let lastPosition=null;
-let watchId=null;
+let boatEnabled=false;
 let pinMode=false;
 let measureMode=false;
-let measurePts=[];
+let measurePoints=[];
+let watchId=null;
+let userMarker=null;
+let accuracyCircle=null;
+let lastPosition=null;
 
-let waypoints=JSON.parse(localStorage.getItem('huntlandWaypoints')||'[]');
+let waypoints=JSON.parse(
+localStorage.getItem('huntlandWaypoints')||'[]'
+);
 
-const markerIcon=emoji=>L.divIcon({
-className:'',
-html:`<div class="iconMarker">${emoji}</div>`,
-iconSize:[30,30],
-iconAnchor:[15,26]
-});
+function toast(msg){
+const el=document.getElementById('toast');
+el.textContent=msg;
+el.style.display='block';
+clearTimeout(toast.timer);
+toast.timer=setTimeout(()=>el.style.display='none',2500);
+}
 
-const areaIcon=L.divIcon({
-className:'',
-html:'<div class="areaMarker">🏹</div>',
-iconSize:[30,30],
-iconAnchor:[15,26]
-});
-
-function esc(s){
+function escapeHTML(s){
 return String(s??'').replace(/[&<>"']/g,c=>({
 '&':'&amp;',
 '<':'&lt;',
@@ -506,1473 +799,1186 @@ return String(s??'').replace(/[&<>"']/g,c=>({
 }[c]));
 }
 
-function toast(msg){
-const t=document.getElementById('toast');
-t.textContent=msg;
-t.style.display='block';
-clearTimeout(toast._t);
-toast._t=setTimeout(()=>t.style.display='none',2600);
+function markerIcon(text){
+return L.divIcon({
+className:'',
+html:`<div class="iconMarker">${text}</div>`,
+iconSize:[30,30],
+iconAnchor:[15,25]
+});
 }
 
-function setBase(k,btn){
-map.removeLayer(activeBase);
-activeBase=bases[k].addTo(map);
-document.querySelectorAll('[data-base]').forEach(b=>b.classList.remove('on'));
+function setBase(which,btn){
+map.removeLayer(currentBase);
+currentBase=base[which].addTo(map);
+
+document.querySelectorAll('[data-base]')
+.forEach(b=>b.classList.remove('on'));
+
 btn.classList.add('on');
 }
 
-function fitRegion(){
-map.fitBounds([[28.8,-94.2],[35.1,-88.0]],{padding:[10,10]});
-}function tab(id,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  if(id==='pins')renderPins();
-  setTimeout(()=>map.invalidateSize(),100);
+function toggleDrawer(){
+const d=document.getElementById('drawer');
+const open=!d.classList.contains('open');
+
+d.classList.toggle('open',open);
+
+document.getElementById('handleText').textContent=
+open?'▼ Hide HuntLand tools':'▲ Show HuntLand tools';
+
+setTimeout(()=>map.invalidateSize(),240);
 }
 
-function toggleSheet(force){
-  const sh=document.querySelector('.sheet');
-  const open=typeof force==='boolean'?force:!sh.classList.contains('open');
-  sh.classList.toggle('open',open);
-  document.querySelector('.sheet .small').textContent=open?'▼ Hide HuntLand tools':'▲ HuntLand tools';
-  setTimeout(()=>map.invalidateSize(),220);
+function openTab(id,btn){
+document.querySelectorAll('.panel')
+.forEach(p=>p.classList.remove('on'));
+
+document.getElementById(id)
+.classList.add('on');
+
+document.querySelectorAll('.tabs button')
+.forEach(b=>b.classList.remove('on'));
+
+btn.classList.add('on');
+
+const d=document.getElementById('drawer');
+
+if(!d.classList.contains('open')){
+d.classList.add('open');
+document.getElementById('handleText').textContent='▼ Hide HuntLand tools';
 }
 
-function toggleOverlay(key,on){
-  if(on){
-    overlays[key].addTo(map);
-    toast('Loading live agency layer…');
-  }else{
-    map.removeLayer(overlays[key]);
-  }
+setTimeout(()=>map.invalidateSize(),200);
 }
 
-async function toggleOSMBoatRamps(on){
-  osmBoatEnabled=on;
+function toggleLayer(name,on){
+if(on){
+layers[name].addTo(map);
+toast('Layer on');
+}else{
+map.removeLayer(layers[name]);
+}
+}function renderAreas(){
+const state=document.getElementById('stateFilter').value;
 
-  if(!on){
-    map.removeLayer(osmBoatLayer);
-    osmBoatLayer.clearLayers();
-    return;
-  }
+const list=AREAS.filter(a=>
+state==='all'||a.state===state
+);
 
-  osmBoatLayer.addTo(map);
-  await refreshOSMBoatRamps();
+document.getElementById('areaList').innerHTML=
+list.map(a=>`
+<div class="card">
+
+<div class="name">${escapeHTML(a.name)}</div>
+
+<div class="small">
+${escapeHTML(a.state)} • ${escapeHTML(a.agency)}
+</div>
+
+<div class="sub" style="margin-top:6px">
+${escapeHTML(a.note)}
+</div>
+
+<div class="btnrow">
+
+<button class="btn primary"
+onclick="showArea('${a.id}')">
+Show Map
+</button>
+
+<button class="btn secondary"
+onclick="chooseArea('${a.id}')">
+Scout
+</button>
+
+<button class="btn secondary"
+onclick="window.open('${a.source}','_blank')">
+Official Info
+</button>
+
+</div>
+</div>
+`).join('');
 }
 
-async function refreshOSMBoatRamps(){
-  if(!osmBoatEnabled)return;
+function drawAreas(){
+areaLayer.clearLayers();
 
-  const b=map.getBounds();
+AREAS.forEach(a=>{
 
-  const q=`[out:json][timeout:20];
-  (
-    node[leisure=slipway](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    node[amenity=boat_ramp](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-    way[leisure=slipway](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
-  );
-  out center tags;`;
+L.marker(
+[a.lat,a.lng],
+{
+icon:L.divIcon({
+className:'',
+html:'<div class="areaMarker">🏹</div>',
+iconSize:[30,30],
+iconAnchor:[15,25]
+})
+}
+)
+.addTo(areaLayer)
+.bindPopup(`
+<div class="name">${escapeHTML(a.name)}</div>
+<div class="small">${escapeHTML(a.agency)}</div>
+<div class="sub">${escapeHTML(a.note)}</div>
 
-  try{
-    const r=await fetch(
-      'https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)
-    );
+<div class="btnrow">
+<button class="btn primary"
+onclick="showArea('${a.id}')">
+Zoom
+</button>
 
-    if(!r.ok)throw Error('HTTP '+r.status);
+<button class="btn secondary"
+onclick="chooseArea('${a.id}')">
+Scout
+</button>
+</div>
+`);
 
-    const j=await r.json();
-
-    osmBoatLayer.clearLayers();
-
-    j.elements.forEach(el=>{
-      const lat=el.lat??el.center?.lat;
-      const lng=el.lon??el.center?.lon;
-
-      if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
-
-      const name=el.tags?.name||'Boat launch / slipway';
-
-      L.marker([lat,lng],{
-        icon:markerIcon('🚤')
-      })
-      .addTo(osmBoatLayer)
-      .bindPopup(`
-        <div class="name">🚤 ${esc(name)}</div>
-        <div class="small">Mapped boat launch</div>
-        <button class="btn secondary wide"
-          onclick="copyCoords(${lat},${lng})">
-          Copy coordinates
-        </button>
-      `);
-    });
-
-    toast(`Loaded ${j.elements.length} boat launches in view`);
-
-  }catch(e){
-    toast('Boat-launch lookup unavailable right now.');
-  }
+});
 }
 
-map.on('moveend',()=>{
-  if(osmBoatEnabled)refreshOSMBoatRamps();
+function showArea(id){
+const a=AREAS.find(x=>x.id===id);
+if(!a)return;
+
+map.flyTo([a.lat,a.lng],13,{
+duration:.7
 });
 
-function renderAreas(){
-  const st=document.getElementById('stateFilter').value;
+const d=document.getElementById('drawer');
 
-  const list=AREA_DATA.filter(a=>
-    st==='all'||a.state===st
-  );
+d.classList.remove('open');
 
-  document.getElementById('areaList').innerHTML=
-    list.map(a=>`
-      <div class="card">
+document.getElementById('handleText').textContent=
+'▲ Show HuntLand tools';
 
-        <div class="name">${esc(a.name)}</div>
-
-        <div class="small">
-          ${esc(a.state)} • ${esc(a.agency)}
-        </div>
-
-        <div>
-          ${a.tags.map(t=>
-            `<span class="badge">${esc(t)}</span>`
-          ).join('')}
-        </div>
-
-        <div class="btnrow">
-
-          <button
-            class="btn primary"
-            onclick="focusArea('${a.id}')">
-            Show on map
-          </button>
-
-          <button
-            class="btn secondary"
-            onclick="selectPlanArea('${a.id}')">
-            Plan hunt
-          </button>
-
-          <button
-            class="btn secondary"
-            onclick="window.open('${a.source}','_blank')">
-            Official info
-          </button>
-
-        </div>
-      </div>
-    `).join('');
+setTimeout(()=>map.invalidateSize(),220);
 }
 
-function drawAreaMarkers(){
-  areaLayer.clearLayers();
+function chooseArea(id){
+const a=AREAS.find(x=>x.id===id);
+if(!a)return;
 
-  AREA_DATA.forEach(a=>{
+document.getElementById('planArea').value=id;
 
-    L.marker(
-      [a.lat,a.lng],
-      {icon:areaIcon}
-    )
-    .addTo(areaLayer)
-    .bindPopup(`
-      <div class="name">${esc(a.name)}</div>
+document.querySelectorAll('.panel')
+.forEach(p=>p.classList.remove('on'));
 
-      <div class="small">
-        ${esc(a.state)} • ${esc(a.agency)}
-      </div>
+document.getElementById('plan')
+.classList.add('on');
 
-      <p class="small">${esc(a.notes)}</p>
+document.querySelectorAll('.tabs button')
+.forEach(b=>b.classList.remove('on'));
 
-      <button
-        class="btn primary wide"
-        onclick="focusArea('${a.id}')">
-        Zoom to area
-      </button>
+document.querySelectorAll('.tabs button')[2]
+.classList.add('on');
 
-      <button
-        class="btn secondary wide"
-        onclick="selectPlanArea('${a.id}')">
-        Plan hunt
-      </button>
-    `);
-  });
+document.getElementById('drawer')
+.classList.add('open');
+
+document.getElementById('handleText').textContent=
+'▼ Hide HuntLand tools';
+
+map.flyTo([a.lat,a.lng],13);
 }
 
-function focusArea(id){
-  const a=AREA_DATA.find(x=>x.id===id);
-
-  if(!a)return;
-
-  map.flyTo(
-    [a.lat,a.lng],
-    12,
-    {duration:.7}
-  );
-
-  toggleSheet(false);
+function populateAreas(){
+document.getElementById('planArea').innerHTML=
+AREAS.map(a=>
+`<option value="${a.id}">
+${escapeHTML(a.name)}
+</option>`
+).join('');
 }
 
-function selectPlanArea(id){
-  document.getElementById('planArea').value=id;
-
-  document.querySelectorAll('.panel')
-    .forEach(p=>p.classList.remove('on'));
-
-  document.getElementById('plan')
-    .classList.add('on');
-
-  document.querySelectorAll('.tabs button')
-    .forEach(b=>b.classList.remove('on'));
-
-  document.querySelectorAll('.tabs button')[2]
-    .classList.add('on');
-
-  focusArea(id);
-  toggleSheet(true);
+function locateMe(center){
+if(!navigator.geolocation){
+toast('GPS unavailable');
+return;
 }
 
-function populatePlanAreas(){
-  document.getElementById('planArea').innerHTML=
-    AREA_DATA.map(a=>
-      `<option value="${a.id}">
-        ${esc(a.name)}
-      </option>`
-    ).join('');
+navigator.geolocation.getCurrentPosition(
+pos=>{
+updateLocation(pos);
+
+if(center){
+map.flyTo(
+[
+pos.coords.latitude,
+pos.coords.longitude
+],
+16
+);
+}
+},
+err=>toast('GPS: '+err.message),
+{
+enableHighAccuracy:true,
+timeout:12000,
+maximumAge:5000
+}
+);
 }
 
-function locateMe(center=false){
+function updateLocation(pos){
+lastPosition=pos;
 
-  if(!navigator.geolocation){
-    toast('GPS is not available in this browser.');
-    return;
-  }
+const ll=[
+pos.coords.latitude,
+pos.coords.longitude
+];
 
-  navigator.geolocation.getCurrentPosition(
-    p=>updatePosition(p,center),
+if(!userMarker){
 
-    e=>toast('GPS error: '+e.message),
+userMarker=L.marker(ll,{
+icon:L.divIcon({
+className:'',
+html:'<div class="userMarker"></div>',
+iconSize:[18,18],
+iconAnchor:[9,9]
+})
+})
+.addTo(map)
+.bindPopup('Your location');
 
-    {
-      enableHighAccuracy:true,
-      timeout:12000,
-      maximumAge:5000
-    }
-  );
+accuracyCircle=L.circle(ll,{
+radius:pos.coords.accuracy||20,
+weight:1,
+fillOpacity:.08
+})
+.addTo(map);
+
+}else{
+
+userMarker.setLatLng(ll);
+
+accuracyCircle
+.setLatLng(ll)
+.setRadius(pos.coords.accuracy||20);
+
 }
 
-function updatePosition(pos,center){
-
-  lastPosition=pos;
-
-  const ll=[
-    pos.coords.latitude,
-    pos.coords.longitude
-  ];
-
-  if(!userMarker){
-
-    userMarker=L.marker(ll,{
-      icon:L.divIcon({
-        className:'',
-        html:'<div class="userMarker"></div>',
-        iconSize:[18,18],
-        iconAnchor:[9,9]
-      })
-    })
-    .addTo(map)
-    .bindPopup('Your location');
-
-    userAccuracy=L.circle(ll,{
-      radius:pos.coords.accuracy||20,
-      weight:1,
-      fillOpacity:.08
-    })
-    .addTo(map);
-
-  }else{
-
-    userMarker.setLatLng(ll);
-
-    userAccuracy
-      .setLatLng(ll)
-      .setRadius(pos.coords.accuracy||20);
-  }
-
-  if(center){
-    map.flyTo(ll,15);
-  }
-
-  renderPins();
+renderPins();
 }
 
 function toggleTracking(btn){
+if(watchId!==null){
 
-  if(watchId!==null){
+navigator.geolocation.clearWatch(watchId);
+watchId=null;
 
-    navigator.geolocation.clearWatch(watchId);
+btn.classList.remove('on');
 
-    watchId=null;
+toast('Tracking off');
 
-    btn.classList.remove('on');
+return;
+}
 
-    toast('GPS tracking off');
+if(!navigator.geolocation){
+toast('GPS unavailable');
+return;
+}
 
-    return;
-  }
+watchId=navigator.geolocation.watchPosition(
+p=>updateLocation(p),
+e=>toast('GPS: '+e.message),
+{
+enableHighAccuracy:true,
+maximumAge:3000,
+timeout:15000
+}
+);
 
-  if(!navigator.geolocation){
-    toast('GPS unavailable');
-    return;
-  }
+btn.classList.add('on');
 
-  watchId=navigator.geolocation.watchPosition(
+toast('Live tracking on');
+}
 
-    p=>updatePosition(p,false),
-
-    e=>toast('GPS error: '+e.message),
-
-    {
-      enableHighAccuracy:true,
-      maximumAge:3000,
-      timeout:15000
-    }
-  );
-
-  btn.classList.add('on');
-
-  toast('GPS tracking on');
+function waypointEmoji(type){
+return({
+camp:'🏕️',
+truck:'🛻',
+boat:'🚤',
+stand:'🌲',
+camera:'📷',
+rub:'🦌',
+scrape:'🦌',
+feed:'🌰',
+scout:'📌'
+})[type]||'📍';
 }
 
 function togglePinMode(){
+pinMode=!pinMode;
+measureMode=false;
 
-  pinMode=!pinMode;
+document.getElementById('pinFab')
+.classList.toggle('on',pinMode);
 
-  document.getElementById('pinFab')
-    .classList.toggle('on',pinMode);
+document.getElementById('measureFab')
+.classList.remove('on');
 
-  if(pinMode){
-
-    measureMode=false;
-
-    document.getElementById('measureFab')
-      .classList.remove('on');
-
-    toast('Tap the map where you want to save a waypoint.');
-
-  }else{
-
-    toast('Waypoint mode off');
-  }
+if(pinMode){
+toast('Tap map to drop a waypoint');
+}else{
+toast('Pin mode off');
+}
 }
 
-function parseCoordinates(text){
+function parseCoords(text){
+const match=String(text||'')
+.trim()
+.match(
+/^\s*(-?\d+(?:\.\d+)?)\s*[, ]+\s*(-?\d+(?:\.\d+)?)\s*$/
+);
 
-  const m=String(text||'')
-    .trim()
-    .match(
-      /^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/
-    );
+if(!match)return null;
 
-  if(!m)return null;
+const lat=Number(match[1]);
+const lng=Number(match[2]);
 
-  const lat=Number(m[1]);
-  const lng=Number(m[2]);
+if(
+!Number.isFinite(lat)||
+!Number.isFinite(lng)||
+lat>90||
+lat<-90||
+lng>180||
+lng<-180
+)return null;
 
-  if(
-    !Number.isFinite(lat)||
-    !Number.isFinite(lng)||
-    lat<-90||
-    lat>90||
-    lng<-180||
-    lng>180
-  ){
-    return null;
-  }
-
-  return {lat,lng};
+return{lat,lng};
 }
 
-function goToCoordinates(savePin=false){
+function goCoords(save){
+const c=parseCoords(
+document.getElementById('coordInput').value
+);
 
-  const c=parseCoordinates(
-    document.getElementById('coordInput').value
-  );
-
-  if(!c){
-
-    toast('Use coordinates like 31.12345, -91.54321');
-
-    return;
-  }
-
-  map.flyTo(
-    [c.lat,c.lng],
-    16,
-    {duration:.7}
-  );
-
-  if(!savePin){
-
-    L.popup()
-      .setLatLng([c.lat,c.lng])
-      .setContent(`
-        <div class="name">Coordinates</div>
-        <div class="small">
-          ${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}
-        </div>
-      `)
-      .openOn(map);
-
-    return;
-  }
-
-  const type=
-    document.getElementById('coordType').value||'scout';
-
-  const name=
-    document.getElementById('coordName').value.trim()||
-    type.charAt(0).toUpperCase()+type.slice(1);
-
-  const wp={
-    id:Date.now(),
-    lat:+c.lat.toFixed(6),
-    lng:+c.lng.toFixed(6),
-    type,
-    name,
-    created:new Date().toISOString()
-  };
-
-  waypoints.push(wp);
-
-  saveWaypoints();
-
-  renderWaypoints();
-
-  renderPins();
-
-  toast('Coordinate pin saved');
+if(!c){
+toast('Example: 31.12345, -91.54321');
+return;
 }
 
-function promptWaypoint(latlng){
+map.flyTo([c.lat,c.lng],16);
 
-  const type=prompt(
-    'Waypoint type:\ncamp, truck, boat, stand, camera, rub, scrape, feed, scout',
-    'scout'
-  );
+if(save){
 
-  if(type===null)return;
+const type=
+document.getElementById('coordType').value;
 
-  const name=prompt(
-    'Waypoint name / note',
-    'Scouting spot'
-  );
+const name=
+document.getElementById('coordName').value.trim()||
+type;
 
-  if(name===null)return;
+saveWaypoint(
+c.lat,
+c.lng,
+type,
+name
+);
 
-  const wp={
-    id:Date.now(),
-    lat:+latlng.lat.toFixed(6),
-    lng:+latlng.lng.toFixed(6),
-    type:(type||'scout').toLowerCase(),
-    name:name||'Waypoint',
-    created:new Date().toISOString()
-  };
+}else{
 
-  waypoints.push(wp);
+L.popup()
+.setLatLng([c.lat,c.lng])
+.setContent(`
+<div class="name">Coordinates</div>
+<div class="small">
+${c.lat.toFixed(6)}, ${c.lng.toFixed(6)}
+</div>
 
-  saveWaypoints();
+<button class="btn secondary wide"
+onclick="copyCoords(${c.lat},${c.lng})">
+Copy
+</button>
+`)
+.openOn(map);
 
-  renderWaypoints();
-
-  renderPins();
-
-  toast('Waypoint saved');
-
-  pinMode=false;
-
-  document.getElementById('pinFab')
-    .classList.remove('on');
+}
 }
 
-function waypointEmoji(t){
+function saveWaypoint(lat,lng,type,name){
 
-  return ({
-    camp:'🏕️',
-    truck:'🛻',
-    boat:'🚤',
-    stand:'🌲',
-    scrape:'🦌',
-    rub:'🦌',
-    feed:'🌰',
-    camera:'📷',
-    scout:'📌'
-  }[t]||'📍');
+waypoints.push({
+id:Date.now()+Math.random(),
+lat:Number(lat),
+lng:Number(lng),
+type:type||'scout',
+name:name||'Waypoint',
+created:new Date().toISOString()
+});
+
+saveWaypoints();
+drawWaypoints();
+renderPins();
+
+toast('Waypoint saved');
 }
 
 function saveWaypoints(){
-
-  localStorage.setItem(
-    'huntlandWaypoints',
-    JSON.stringify(waypoints)
-  );
+localStorage.setItem(
+'huntlandWaypoints',
+JSON.stringify(waypoints)
+);
 }
 
-function renderWaypoints(){
+function drawWaypoints(){
+waypointLayer.clearLayers();
 
-  waypointLayer.clearLayers();
+waypoints.forEach(w=>{
 
-  waypoints.forEach(w=>{
-
-    const m=L.marker(
-      [w.lat,w.lng],
-      {
-        icon:markerIcon(
-          waypointEmoji(w.type)
-        )
-      }
-    )
-    .addTo(waypointLayer);
-
-    m.bindPopup(`
-      <div class="name">
-        ${waypointEmoji(w.type)} ${esc(w.name)}
-      </div>
-
-      <div class="small">
-        ${esc(w.type)}
-        <br>
-        ${w.lat.toFixed(5)}, ${w.lng.toFixed(5)}
-      </div>
-
-      <button
-        class="btn secondary wide"
-        onclick="copyCoords(${w.lat},${w.lng})">
-        Copy coordinates
-      </button>
-
-      <button
-        class="btn danger wide"
-        onclick="deletePin(${w.id})">
-        Delete
-      </button>
-    `);
-  });
+L.marker(
+[w.lat,w.lng],
+{
+icon:markerIcon(
+waypointEmoji(w.type)
+)
 }
+)
+.addTo(waypointLayer)
+.bindPopup(`
+<div class="name">
+${waypointEmoji(w.type)}
+${escapeHTML(w.name)}
+</div>
 
-async function copyCoords(lat,lng){
+<div class="small">
+${w.lat.toFixed(6)}, ${w.lng.toFixed(6)}
+</div>
 
-  const text=
-    `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+<div class="btnrow">
 
-  try{
+<button class="btn secondary"
+onclick="copyCoords(${w.lat},${w.lng})">
+Copy
+</button>
 
-    await navigator.clipboard.writeText(text);
+<button class="btn danger"
+onclick="deleteWaypoint('${w.id}')">
+Delete
+</button>
 
-    toast('Coordinates copied');
+</div>
+`);
 
-  }catch(e){
-
-    prompt(
-      'Copy coordinates:',
-      text
-    );
-  }
-}
-
-function haversineMiles(a,b){
-
-  const R=3958.7613;
-  const rad=Math.PI/180;
-
-  const dLat=(b.lat-a.lat)*rad;
-  const dLon=(b.lng-a.lng)*rad;
-
-  const la1=a.lat*rad;
-  const la2=b.lat*rad;
-
-  const h=
-    Math.sin(dLat/2)**2+
-    Math.cos(la1)*
-    Math.cos(la2)*
-    Math.sin(dLon/2)**2;
-
-  return 2*R*Math.asin(Math.sqrt(h));
-}
-
-function bearing(a,b){
-
-  const r=Math.PI/180;
-
-  const y=
-    Math.sin((b.lng-a.lng)*r)*
-    Math.cos(b.lat*r);
-
-  const x=
-    Math.cos(a.lat*r)*
-    Math.sin(b.lat*r)-
-    Math.sin(a.lat*r)*
-    Math.cos(b.lat*r)*
-    Math.cos((b.lng-a.lng)*r);
-
-  return (
-    Math.atan2(y,x)/r+360
-  )%360;
+});
 }
 
 function renderPins(){
+const el=document.getElementById('pinList');
 
-  const el=document.getElementById('pinList');
-
-  if(!waypoints.length){
-
-    el.innerHTML=
-      '<div class="empty">No saved waypoints yet.</div>';
-
-    return;
-  }
-
-  el.innerHTML=
-    waypoints
-      .slice()
-      .reverse()
-      .map(w=>{
-
-        let d='';
-
-        if(lastPosition){
-
-          const a={
-            lat:lastPosition.coords.latitude,
-            lng:lastPosition.coords.longitude
-          };
-
-          const b={
-            lat:w.lat,
-            lng:w.lng
-          };
-
-          d=`
-            <div class="small">
-              ${haversineMiles(a,b).toFixed(2)} mi
-              • bearing ${Math.round(bearing(a,b))}°
-            </div>
-          `;
-        }
-
-        return `
-          <div class="card">
-
-            <div class="row">
-
-              <div>
-
-                <div class="name">
-                  ${waypointEmoji(w.type)} ${esc(w.name)}
-                </div>
-
-                <div class="small">
-                  ${esc(w.type)}
-                  •
-                  ${w.lat.toFixed(5)}, ${w.lng.toFixed(5)}
-                </div>
-
-                ${d}
-
-              </div>
-
-              <button
-                class="btn secondary"
-                onclick="flyPin(${w.id})">
-                Go
-              </button>
-
-            </div>
-
-          </div>
-        `;
-      })
-      .join('');
+if(!waypoints.length){
+el.innerHTML=
+'<div class="sub" style="padding:15px;text-align:center">No saved waypoints yet.</div>';
+return;
 }
 
-function flyPin(id){
+el.innerHTML=
+waypoints.slice().reverse().map(w=>{
 
-  const w=waypoints.find(x=>x.id===id);
+let distance='';
 
-  if(w){
-    map.flyTo(
-      [w.lat,w.lng],
-      16
-    );
-  }
+if(lastPosition){
+
+const here=L.latLng(
+lastPosition.coords.latitude,
+lastPosition.coords.longitude
+);
+
+const there=L.latLng(
+w.lat,
+w.lng
+);
+
+const miles=
+here.distanceTo(there)/1609.344;
+
+distance=
+`<div class="small">${miles.toFixed(2)} miles from you</div>`;
 }
 
-function deletePin(id){
+return`
+<div class="card">
 
-  waypoints=
-    waypoints.filter(
-      x=>x.id!==id
-    );
+<div class="row">
 
-  saveWaypoints();
+<div>
 
-  renderWaypoints();
+<div class="name">
+${waypointEmoji(w.type)}
+${escapeHTML(w.name)}
+</div>
 
-  renderPins();
+<div class="small">
+${w.lat.toFixed(6)}, ${w.lng.toFixed(6)}
+</div>
 
-  map.closePopup();
+${distance}
+
+</div>
+
+<button class="btn primary"
+onclick="map.flyTo([${w.lat},${w.lng}],16)">
+Map
+</button>
+
+</div>
+
+<div class="btnrow">
+
+<button class="btn secondary"
+onclick="copyCoords(${w.lat},${w.lng})">
+Copy coordinates
+</button>
+
+<button class="btn danger"
+onclick="deleteWaypoint('${w.id}')">
+Delete
+</button>
+
+</div>
+</div>
+`;
+
+}).join('');
 }
 
-function clearAllPins(){
+function deleteWaypoint(id){
+waypoints=
+waypoints.filter(w=>
+String(w.id)!==String(id)
+);
 
-  if(
-    !confirm(
-      'Delete all saved HuntLand waypoints from this device?'
-    )
-  ){
-    return;
-  }
-
-  waypoints=[];
-
-  saveWaypoints();
-
-  renderWaypoints();
-
-  renderPins();
+saveWaypoints();
+drawWaypoints();
+renderPins();
+map.closePopup();
 }
 
-function toggleMeasure(){
-
-  measureMode=!measureMode;
-
-  document.getElementById('measureFab')
-    .classList.toggle('on',measureMode);
-
-  if(measureMode){
-
-    pinMode=false;
-
-    document.getElementById('pinFab')
-      .classList.remove('on');
-
-    toast(
-      'Tap map points to measure. Tap 📏 again to stop.'
-    );
-
-  }else{
-
-    toast('Measurement stopped');
-  }
+function clearPins(){
+if(!confirm('Delete all saved waypoints?')){
+return;
 }
 
-function addMeasurePoint(latlng){
+waypoints=[];
 
-  measurePts.push(latlng);
+saveWaypoints();
+drawWaypoints();
+renderPins();
 
-  redrawMeasure();
+toast('Pins cleared');
 }
 
-function redrawMeasure(){
+async function copyCoords(lat,lng){
+const text=
+`${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`;
 
-  measureLayer.clearLayers();
+try{
 
-  if(!measurePts.length)return;
+await navigator.clipboard.writeText(text);
 
-  L.polyline(
-    measurePts,
-    {weight:4}
-  )
-  .addTo(measureLayer);
+toast('Coordinates copied');
 
-  measurePts.forEach(p=>
+}catch(e){
 
-    L.circleMarker(
-      p,
-      {
-        radius:4,
-        weight:2,
-        fillOpacity:1
-      }
-    )
-    .addTo(measureLayer)
-  );
-
-  let mi=0;
-
-  for(
-    let i=1;
-    i<measurePts.length;
-    i++
-  ){
-
-    mi+=
-      map.distance(
-        measurePts[i-1],
-        measurePts[i]
-      )/1609.344;
-  }
-
-  const end=
-    measurePts[
-      measurePts.length-1
-    ];
-
-  L.marker(
-    end,
-    {
-      icon:L.divIcon({
-        className:'',
-        html:`
-          <div style="
-          background:#fff;
-          padding:4px 6px;
-          border-radius:7px;
-          border:1px solid #999;
-          font-weight:900;
-          white-space:nowrap">
-          ${mi.toFixed(2)} mi
-          </div>
-        `,
-        iconSize:[70,24],
-        iconAnchor:[35,28]
-      })
-    }
-  )
-  .addTo(measureLayer);
+prompt('Copy coordinates:',text);
 }
-
-function clearMeasure(){
-
-  measurePts=[];
-
-  measureLayer.clearLayers();
-
-  measureMode=false;
-
-  document.getElementById('measureFab')
-    .classList.remove('on');
 }
 
 map.on('click',e=>{
 
-  if(pinMode){
+if(measureMode){
+addMeasurePoint(e.latlng);
+return;
+}
 
-    promptWaypoint(e.latlng);
+if(!pinMode)return;
 
-  }else if(measureMode){
+const type=prompt(
+'Type: camp, truck, boat, stand, camera, rub, scrape, feed, scout',
+'scout'
+);
 
-    addMeasurePoint(e.latlng);
-  }
+if(type===null)return;
+
+const name=prompt(
+'Name this waypoint',
+'Scouting spot'
+);
+
+if(name===null)return;
+
+saveWaypoint(
+e.latlng.lat,
+e.latlng.lng,
+type.toLowerCase(),
+name
+);
+
+pinMode=false;
+
+document.getElementById('pinFab')
+.classList.remove('on');
 });
 
-map.on('contextmenu',e=>{
+function toggleMeasure(){
+measureMode=!measureMode;
+pinMode=false;
 
-  if(!measureMode){
+document.getElementById('measureFab')
+.classList.toggle('on',measureMode);
 
-    promptWaypoint(e.latlng);
-  }
+document.getElementById('pinFab')
+.classList.remove('on');
+
+if(measureMode){
+toast('Tap map points to measure');
+}else{
+toast('Measure mode off');
+}
+}
+
+function addMeasurePoint(p){
+measurePoints.push(p);
+
+measureLayer.clearLayers();
+
+if(measurePoints.length===1){
+
+L.circleMarker(p,{
+radius:5,
+fillOpacity:1
+})
+.addTo(measureLayer);
+
+return;
+}
+
+L.polyline(measurePoints,{
+weight:4
+})
+.addTo(measureLayer);
+
+measurePoints.forEach(pt=>
+L.circleMarker(pt,{
+radius:4,
+fillOpacity:1
+})
+.addTo(measureLayer)
+);
+
+let meters=0;
+
+for(let i=1;i<measurePoints.length;i++){
+
+meters+=map.distance(
+measurePoints[i-1],
+measurePoints[i]
+);
+}
+
+const miles=meters/1609.344;
+const yards=meters*1.09361;
+
+toast(
+miles>=.25
+?`${miles.toFixed(2)} miles`
+:`${Math.round(yards)} yards`
+);
+}
+
+function clearMeasure(){
+measurePoints=[];
+measureLayer.clearLayers();
+measureMode=false;
+
+document.getElementById('measureFab')
+.classList.remove('on');
+
+toast('Measurement cleared');
+}
+
+async function toggleBoatLaunches(on){
+boatEnabled=on;
+
+if(!on){
+
+map.removeLayer(boatLayer);
+boatLayer.clearLayers();
+
+return;
+}
+
+boatLayer.addTo(map);
+
+loadBoatLaunches();
+}
+
+async function loadBoatLaunches(){
+if(!boatEnabled)return;
+
+const b=map.getBounds();
+
+const query=`
+[out:json][timeout:20];
+(
+node["leisure"="slipway"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+node["amenity"="boat_ramp"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+way["leisure"="slipway"](${b.getSouth()},${b.getWest()},${b.getNorth()},${b.getEast()});
+);
+out center tags;
+`;
+
+try{
+
+toast('Loading boat launches…');
+
+const res=await fetch(
+'https://overpass-api.de/api/interpreter?data='+
+encodeURIComponent(query)
+);
+
+if(!res.ok)throw new Error();
+
+const data=await res.json();
+
+boatLayer.clearLayers();
+
+data.elements.forEach(x=>{
+
+const lat=x.lat??x.center?.lat;
+const lng=x.lon??x.center?.lon;
+
+if(
+!Number.isFinite(lat)||
+!Number.isFinite(lng)
+)return;
+
+const name=
+x.tags?.name||
+'Boat Launch';
+
+L.marker(
+[lat,lng],
+{
+icon:markerIcon('🚤')
+}
+)
+.addTo(boatLayer)
+.bindPopup(`
+<div class="name">🚤 ${escapeHTML(name)}</div>
+
+<div class="small">
+Mapped boat launch
+</div>
+
+<button class="btn secondary wide"
+onclick="copyCoords(${lat},${lng})">
+Copy coordinates
+</button>
+`);
+
 });
 
-function buildPlan(){
+toast(
+`${data.elements.length} launches loaded`
+);
 
-  const a=
-    AREA_DATA.find(
-      x=>
-        x.id===
-        document.getElementById('planArea').value
-    );
+}catch(e){
 
-  const species=
-    document.getElementById('species').value;
+toast(
+'Boat-launch service unavailable right now'
+);
+}
+}
 
-  const access=
-    document.getElementById('access').value;
+map.on('moveend',()=>{
+if(boatEnabled){
+loadBoatLaunches();
+}
+});
 
-  const time=
-    document.getElementById('huntTime').value;
+function buildScoutPlan(){
+const area=
+AREAS.find(a=>
+a.id===
+document.getElementById('planArea').value
+);
 
-  const effort=
-    document.getElementById('effort').value;
+if(!area)return;
 
-  const notes=
-    document.getElementById('huntNotes')
-      .value.trim();
+const species=
+document.getElementById('species').value;
 
-  localStorage.setItem(
-    'huntlandPlan',
-    JSON.stringify({
-      area:a.id,
-      species,
-      access,
-      time,
-      effort,
-      notes
-    })
-  );
+const access=
+document.getElementById('access').value;
 
-  let tips=[];
+const time=
+document.getElementById('huntTime').value;
 
-  if(species==='Deer'){
+const effort=
+document.getElementById('effort').value;
 
-    tips.push(
-      'Prioritize mast, browse, edge cover, crossings and terrain/elevation transitions rather than open easy-access ground.'
-    );
-  }
+const notes=
+document.getElementById('huntNotes').value.trim();
 
-  if(species==='Turkey'){
+let advice=[];
 
-    tips.push(
-      'Prioritize mature timber, openings, creek benches/ridges, likely roost habitat and quiet access routes.'
-    );
-  }
+if(species==='Deer'){
 
-  if(species==='Waterfowl'){
+advice.push(
+'Study habitat edges, hardwood/pine transitions, creek crossings, drainages, mast-producing timber, bedding cover and funnels.'
+);
 
-    tips.push(
-      'Check current water levels, legal boating access, refuge/WMA closures and shooting-hour rules before committing to a route.'
-    );
-  }
+advice.push(
+'Compare promising habitat with distance from roads, parking and easy access to estimate hunting pressure.'
+);
 
-  if(access==='Boat-in'){
+if(time==='Morning'){
 
-    tips.push(
-      'Verify legal ramps/landings, water levels and navigation hazards; save both ramp and return-route waypoints.'
-    );
-  }
+advice.push(
+'Plan your entry so you do not cross likely feeding-to-bedding travel before daylight.'
+);
+}
 
-  if(access==='Walk-in'){
+if(time==='Evening'){
 
-    tips.push(
-      'Use the measure tool to compare distance from easy access and save the truck before leaving the road.'
-    );
-  }
+advice.push(
+'Look for bedding-to-feed travel and plan an exit that avoids likely feeding areas.'
+);
+}
+}
 
-  if(access==='ATV-assisted'){
+if(species==='Turkey'){
 
-    tips.push(
-      'Turn on the relevant roads/MVUM layer and verify the route is legal for the date and vehicle class.'
-    );
-  }
+advice.push(
+'Study ridges, creek bottoms, mature timber, openings, burns/young growth and likely roost-to-feed travel.'
+);
 
-  if(access==='E-bike'){
+advice.push(
+'Keep several legal approach routes available so you can reposition without crossing the bird.'
+);
+}
 
-    tips.push(
-      'Turn on USFS MVUM trails where applicable and verify the specific route and e-bike class before riding.'
-    );
-  }
+if(species==='Waterfowl'){
 
-  if(effort==='Deep'){
+advice.push(
+'Study shallow water, feeding habitat, boat access, wind direction and safe legal entry/exit routes.'
+);
+}
 
-    tips.push(
-      'Download or screenshot critical map information before losing service and carry a second navigation method.'
-    );
-  }
+if(access==='E-bike'){
 
-  if(time==='Morning'){
+advice.push(
+'Turn on USFS roads / trails / e-bike data where applicable. Verify the exact route, e-bike class and seasonal status before riding.'
+);
+}
 
-    tips.push(
-      'Plan the final approach in advance so you are not choosing crossings or routes in the dark.'
-    );
-  }
+if(access==='ATV-assisted'){
 
-  if(time==='Evening'){
+advice.push(
+'Turn on WMA roads/trails or USFS MVUM data and verify that the exact route is open to your vehicle on the hunt date.'
+);
+}
 
-    tips.push(
-      'Save a safe exit route and truck/boat waypoint before the hunt.'
-    );
-  }
+if(access==='Boat-in'){
 
-  document.getElementById('planResult').innerHTML=`
+advice.push(
+'Turn on boat ramps and access points. Save your launch and return route before leaving the ramp.'
+);
+}
 
-    <div class="card">
+if(effort==='Deep / low pressure'){
 
-      <div class="name">
-        ${esc(a.name)} — ${esc(species)} plan
-      </div>
+advice.push(
+'Use the measure tool to compare habitat quality against distance from roads and obvious access. Farther is not automatically better.'
+);
+}
 
-      <div class="small">
-        ${esc(access)}
-        •
-        ${esc(time)}
-        •
-        ${esc(effort)}
-      </div>
+document.getElementById('planResult').innerHTML=`
+<div class="card">
 
-      ${tips.map(t=>
-        `<p class="sub">• ${esc(t)}</p>`
-      ).join('')}
+<div class="name">
+🎯 ${escapeHTML(species)} e-scout
+</div>
 
-      <p class="sub">
-        <b>Area note:</b>
-        ${esc(a.notes)}
-      </p>
+<div class="small">
+${escapeHTML(area.name)}
+• ${escapeHTML(access)}
+• ${escapeHTML(time)}
+</div>
 
-      ${
-        notes
-        ?`
-          <p class="sub">
-            <b>Your note:</b>
-            ${esc(notes)}
-          </p>
-        `
-        :''
-      }
+${advice.map(x=>
+`<p class="sub">• ${escapeHTML(x)}</p>`
+).join('')}
 
-      <a
-        class="sourceLink"
-        href="${a.source}"
-        target="_blank"
-        rel="noopener">
-        Open current official area information ↗
-      </a>
+<p class="sub">
+<b>Area:</b>
+${escapeHTML(area.note)}
+</p>
 
-    </div>
-  `;
+${notes?
+`<p class="sub">
+<b>Your notes:</b>
+${escapeHTML(notes)}
+</p>`:''}
+
+<div class="notice">
+Scouting recommendations identify features worth investigating. They do not mean animals are guaranteed to be there. Verify current hunting and access rules before going.
+</div>
+
+<div class="btnrow">
+
+<button class="btn primary"
+onclick="showArea('${area.id}')">
+Show Map
+</button>
+
+<button class="btn secondary"
+onclick="window.open('${area.source}','_blank')">
+Current Official Info
+</button>
+
+</div>
+</div>
+`;
+
+localStorage.setItem(
+'huntlandPlan',
+JSON.stringify({
+area:area.id,
+species,
+access,
+time,
+effort,
+notes
+})
+);
 }
 
 function renderRules(){
+document.getElementById('rulesList').innerHTML=
+SOURCES.map(s=>`
+<div class="card">
 
-  document.getElementById('rulesList').innerHTML=
+<div class="name">
+${escapeHTML(s[0])}
+</div>
 
-    OFFICIAL_SOURCES.map(s=>`
+<div class="small">
+${escapeHTML(s[1])} official source
+</div>
 
-      <div class="card">
+<button class="btn secondary wide"
+onclick="window.open('${s[2]}','_blank')">
+Open Current Information
+</button>
 
-        <div class="name">
-          ${esc(s.name)}
-        </div>
-
-        <div class="small">
-          ${esc(s.agency)} official source
-        </div>
-
-        <a
-          class="sourceLink"
-          href="${s.url}"
-          target="_blank"
-          rel="noopener">
-          Open official source ↗
-        </a>
-
-      </div>
-
-    `).join('');
-}
-
-function xmlEsc(s){
-
-  return String(s??'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&apos;');
+</div>
+`).join('');
 }
 
 function exportGPX(){
+if(!waypoints.length){
+toast('No waypoints to export');
+return;
+}
 
-  if(!waypoints.length){
-    toast('No waypoints to export');
-    return;
-  }
+const points=
+waypoints.map(w=>`
+<wpt lat="${w.lat}" lon="${w.lng}">
+<name>${xmlEscape(w.name)}</name>
+<desc>${xmlEscape(w.type)}</desc>
+</wpt>
+`).join('');
 
-  const body=
-    waypoints.map(w=>`
-
-      <wpt lat="${w.lat}" lon="${w.lng}">
-
-        <name>
-          ${xmlEsc(w.name)}
-        </name>
-
-        <desc>
-          ${xmlEsc(w.type||'waypoint')}
-        </desc>
-
-        <time>
-          ${xmlEsc(
-            w.created||
-            new Date().toISOString()
-          )}
-        </time>
-
-      </wpt>
-
-    `).join('');
-
-  const gpx=
+const gpx=
 `<?xml version="1.0" encoding="UTF-8"?>
-<gpx
- version="1.1"
- creator="HuntLand"
- xmlns="http://www.topografix.com/GPX/1/1">
-${body}
+<gpx version="1.1"
+creator="HuntLand"
+xmlns="http://www.topografix.com/GPX/1/1">
+${points}
 </gpx>`;
 
-  const blob=
-    new Blob(
-      [gpx],
-      {type:'application/gpx+xml'}
-    );
-
-  const url=
-    URL.createObjectURL(blob);
-
-  const a=
-    document.createElement('a');
-
-  a.href=url;
-
-  a.download=
-    'huntland-waypoints.gpx';
-
-  a.click();
-
-  setTimeout(
-    ()=>URL.revokeObjectURL(url),
-    1000
-  );
-
-  toast(
-    `Exported ${waypoints.length} GPX waypoints`
-  );
+downloadFile(
+'huntland-waypoints.gpx',
+gpx,
+'application/gpx+xml'
+);
 }
 
-function importGPX(ev){
-
-  const f=ev.target.files?.[0];
-
-  if(!f)return;
-
-  const r=new FileReader();
-
-  r.onload=()=>{
-
-    try{
-
-      const x=
-        new DOMParser()
-        .parseFromString(
-          r.result,
-          'application/xml'
-        );
-
-      if(x.querySelector('parsererror')){
-        throw Error('Bad GPX');
-      }
-
-      const pts=[
-        ...x.getElementsByTagNameNS('*','wpt')
-      ];
-
-      let n=0;
-
-      pts.forEach(pt=>{
-
-        const lat=
-          parseFloat(
-            pt.getAttribute('lat')
-          );
-
-        const lng=
-          parseFloat(
-            pt.getAttribute('lon')
-          );
-
-        if(
-          !Number.isFinite(lat)||
-          !Number.isFinite(lng)
-        ){
-          return;
-        }
-
-        const name=
-          (
-            pt.getElementsByTagNameNS('*','name')[0]
-            ?.textContent||
-            'Imported waypoint'
-          ).trim();
-
-        const desc=
-          (
-            pt.getElementsByTagNameNS('*','desc')[0]
-            ?.textContent||
-            'scout'
-          ).trim();
-
-        const time=
-          (
-            pt.getElementsByTagNameNS('*','time')[0]
-            ?.textContent||
-            new Date().toISOString()
-          ).trim();
-
-        waypoints.push({
-          id:Date.now()+n++,
-          lat,
-          lng,
-          type:[
-            'camp',
-            'truck',
-            'boat',
-            'stand',
-            'camera',
-            'rub',
-            'scrape',
-            'feed',
-            'scout'
-          ].includes(desc)
-            ?desc
-            :'scout',
-          name,
-          created:time
-        });
-      });
-
-      saveWaypoints();
-
-      renderWaypoints();
-
-      renderPins();
-
-      toast(
-        `Imported ${n} GPX waypoints`
-      );
-
-    }catch(e){
-
-      toast(
-        'Could not import that GPX file.'
-      );
-    }
-  };
-
-  r.readAsText(f);
-
-  ev.target.value='';
+function xmlEscape(s){
+return String(s??'')
+.replace(/&/g,'&amp;')
+.replace(/</g,'&lt;')
+.replace(/>/g,'&gt;')
+.replace(/"/g,'&quot;')
+.replace(/'/g,'&apos;');
 }
 
-function exportGeoJSON(){
+function downloadFile(name,text,type){
+const blob=new Blob([text],{type});
+const url=URL.createObjectURL(blob);
 
-  const fc={
-    type:'FeatureCollection',
+const a=document.createElement('a');
 
-    features:
-      waypoints.map(w=>({
+a.href=url;
+a.download=name;
 
-        type:'Feature',
+document.body.appendChild(a);
+a.click();
+a.remove();
 
-        geometry:{
-          type:'Point',
-          coordinates:[
-            w.lng,
-            w.lat
-          ]
-        },
-
-        properties:{
-          name:w.name,
-          type:w.type,
-          created:w.created
-        }
-
-      }))
-  };
-
-  const blob=
-    new Blob(
-      [JSON.stringify(fc,null,2)],
-      {type:'application/geo+json'}
-    );
-
-  const url=
-    URL.createObjectURL(blob);
-
-  const a=
-    document.createElement('a');
-
-  a.href=url;
-
-  a.download=
-    'huntland-waypoints.geojson';
-
-  a.click();
-
-  setTimeout(
-    ()=>URL.revokeObjectURL(url),
-    1000
-  );
+setTimeout(
+()=>URL.revokeObjectURL(url),
+1000
+);
 }
 
-function importGeoJSON(ev){
+function importGPX(event){
+const file=event.target.files[0];
 
-  const f=ev.target.files?.[0];
+if(!file)return;
 
-  if(!f)return;
+const reader=new FileReader();
 
-  const r=new FileReader();
+reader.onload=()=>{
 
-  r.onload=()=>{
+try{
 
-    try{
+const xml=
+new DOMParser()
+.parseFromString(
+reader.result,
+'application/xml'
+);
 
-      const j=JSON.parse(r.result);
+if(xml.querySelector('parsererror')){
+throw new Error();
+}
 
-      if(j.type!=='FeatureCollection'){
-        throw Error(
-          'Not a FeatureCollection'
-        );
-      }
+const pts=[
+...xml.getElementsByTagNameNS('*','wpt')
+];
 
-      let n=0;
+let count=0;
 
-      j.features.forEach(ft=>{
+pts.forEach(p=>{
 
-        if(
-          ft.geometry?.type==='Point'
-        ){
+const lat=
+parseFloat(
+p.getAttribute('lat')
+);
 
-          const [lng,lat]=
-            ft.geometry.coordinates;
+const lng=
+parseFloat(
+p.getAttribute('lon')
+);
 
-          waypoints.push({
+if(
+!Number.isFinite(lat)||
+!Number.isFinite(lng)
+)return;
 
-            id:Date.now()+n++,
+const name=
+p.getElementsByTagNameNS('*','name')[0]
+?.textContent||
+'Imported waypoint';
 
-            lat:+lat,
+const type=
+p.getElementsByTagNameNS('*','desc')[0]
+?.textContent||
+'scout';
 
-            lng:+lng,
+saveWaypoint(
+lat,
+lng,
+type.toLowerCase(),
+name
+);
 
-            type:
-              ft.properties?.type||
-              'scout',
+count++;
+});
 
-            name:
-              ft.properties?.name||
-              'Imported waypoint',
+toast(
+`${count} GPX waypoints imported`
+);
 
-            created:
-              ft.properties?.created||
-              new Date().toISOString()
-          });
-        }
-      });
+}catch(e){
 
-      saveWaypoints();
+toast(
+'Could not read GPX file'
+);
+}
 
-      renderWaypoints();
+event.target.value='';
+};
 
-      renderPins();
-
-      toast(
-        `Imported ${n} waypoints`
-      );
-
-    }catch(e){
-
-      toast(
-        'Could not import that GeoJSON file.'
-      );
-    }
-  };
-
-  r.readAsText(f);
-
-  ev.target.value='';
+reader.readAsText(file);
 }
 
 function loadSavedPlan(){
+try{
 
-  try{
+const p=
+JSON.parse(
+localStorage.getItem('huntlandPlan')||
+'null'
+);
 
-    const p=
-      JSON.parse(
-        localStorage.getItem(
-          'huntlandPlan'
-        )||'null'
-      );
+if(!p)return;
 
-    if(!p)return;
+document.getElementById('planArea').value=
+p.area||AREAS[0].id;
 
-    document.getElementById('planArea').value=
-      p.area||
-      AREA_DATA[0].id;
+document.getElementById('species').value=
+p.species||'Deer';
 
-    document.getElementById('species').value=
-      p.species||
-      'Deer';
+document.getElementById('access').value=
+p.access||'Walk-in';
 
-    document.getElementById('access').value=
-      p.access||
-      'Walk-in';
+document.getElementById('huntTime').value=
+p.time||'Morning';
 
-    document.getElementById('huntTime').value=
-      p.time||
-      'Morning';
+document.getElementById('effort').value=
+p.effort||'Moderate';
 
-    document.getElementById('effort').value=
-      p.effort||
-      'Moderate';
+document.getElementById('huntNotes').value=
+p.notes||'';
 
-    document.getElementById('huntNotes').value=
-      p.notes||
-      '';
-
-  }catch(e){}
+}catch(e){}
 }
 
-drawAreaMarkers();
+/* START HUNTLAND */
+
+populateAreas();
 
 renderAreas();
 
-try{
+drawAreas();
 
-  overlays.laBoundary.addTo(map);
-
-  document.getElementById(
-    'laBoundaryToggle'
-  ).checked=true;
-
-}catch(e){}
-
-try{
-
-  overlays.msBoundary.addTo(map);
-
-  document.getElementById(
-    'msBoundaryToggle'
-  ).checked=true;
-
-}catch(e){}
-
-try{
-
-  overlays.usfsBoundary.addTo(map);
-
-  document.getElementById(
-    'usfsBoundaryToggle'
-  ).checked=true;
-
-}catch(e){}
-
-populatePlanAreas();
-
-loadSavedPlan();
-
-renderWaypoints();
+drawWaypoints();
 
 renderPins();
 
 renderRules();
 
+loadSavedPlan();
+
+L.control.scale({
+imperial:true,
+metric:false
+}).addTo(map);
+
 setTimeout(
-  ()=>map.invalidateSize(),
-  200
+()=>map.invalidateSize(),
+300
 );
 
 </script>
+</div>
 </body>
 </html>
