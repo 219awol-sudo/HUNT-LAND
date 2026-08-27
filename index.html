@@ -3,10 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HUNT-LAND</title>
+  <title>HuntLand</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #10150f;
+      color: white;
+    }
+
+    header {
+      background: #182218;
+      padding: 22px 18px;
+      text-align: center;
+      border-bottom: 2px solid #73834a;
+    }
+
+    header h1 {
+      font-size: 34px;
+      letter-spacing: 2px;
+    }
+
+    header p {
+      margin-top: 6px;
+      color: #c8d0bb;
+    }
+
+    .hero {
+      min-height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      background:
+        linear-gradient(rgba(8,15,8,.65), rgba(8,15,8,.85)),
+        linear-gradient(135deg, #31442b, #11170f);
+    }
+
+    .hero-content {
+      max-width: 700px;
+    }
+
+    .hero h2 {
+      font-size: 42px;
+      margin-bottom: 18px;
+    }
+
+    .hero p {
+      font-size: 19px;
+      line-height: 1.6;
+      color: #e0e4db;
+      margin-bottom: 28px;
+    }
+
+    .button {
+      display: inline-block;
+      background: #788d45;
+      color: white;
+      padding: 15px 26px;
+      border-radius: 7px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .section {
+      padding: 55px 20px;
+      max-width: 1050px;
+      margin: auto;
+    }
+
+    .section h2 {
+      text-align: center;
+      font-size: 30px;
+      margin-bottom: 35px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #1b241a;
+      border: 1px solid #354431;
+      padding: 28px 20px;
+      border-radius: 10px;
+    }
+
+    .card h3 {
+      color: #a9bd72;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: #cdd4c8;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px 15px;
+      background: #0b0f0a;
+      color: #899184;
+      font-size: 14px;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>HUNT-LAND</h1>
-  <p>Welcome to HUNT-LAND.</p>
+
+<header>
+  <h1>HUNTLAND</h1>
+  <p>Find Your Next Hunting Adventure</p>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <h2>Find Land. Hunt More.</h2>
+    <p>
+      Discover hunting land, public hunting opportunities,
+      and the information you need to plan your next hunt.
+    </p>
+
+    <a class="button" href="#explore">Explore Hunting Land</a>
+  </div>
+</section>
+
+<section class="section" id="explore">
+  <h2>Explore HuntLand</h2>
+
+  <div class="cards">
+
+    <div class="card">
+      <h3>Public Land</h3>
+      <p>Find public hunting areas and opportunities near you.</p>
+    </div>
+
+    <div class="card">
+      <h3>Hunting Land</h3>
+      <p>Explore land and properties available for hunting.</p>
+    </div>
+
+    <div class="card">
+      <h3>Maps</h3>
+      <p>Use maps to research hunting areas and plan your hunt.</p>
+    </div>
+
+    <div class="card">
+      <h3>Hunting Information</h3>
+      <p>Find useful information for deer, turkey and other hunting opportunities.</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  © 2026 HuntLand. All rights reserved.
+</footer>
+
 </body>
 </html>
